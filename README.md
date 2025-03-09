@@ -37,6 +37,14 @@ npm i
 npm run dev
 ```
 
+## .env variables!!!
+
+```
+MONGODB_URI=mongodb+srv://user:user@clusterp.vu1t4.mongodb.net/giumarketplace
+JWT_SECRET=8bf8a6f419e7bedb70e273d2ae2ef8111402113c0d52598d25af974710024e56493cfc44f2114b36fb15e6de9d03555dfe8262626d3d877c7cd91b4f6973982e
+PORT=8080
+```
+
 ## Development Workflow
 
 1. Create a new branch from main:
