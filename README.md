@@ -60,6 +60,7 @@ git push origin feature/your-feature-name
 - Go to GitHub repository
 - Click "New Pull Request"
 - Select your branch
+- Merge into "STAGING" branch!!!!
 - Add @moustafashady as reviewer
 - Describe your changes in detail
 
