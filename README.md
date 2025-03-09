@@ -26,7 +26,7 @@ GIUMARKET/
 ```bash
 cd backend
 npm i
-npm start
+npm run dev
 ```
 
 ### Frontend
