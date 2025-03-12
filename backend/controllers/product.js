@@ -1,6 +1,4 @@
-const Product = require('../models/product.js');
-
-
+const Product = require("../models/product.js");
 
 // SHOW PRODUCTS
 
@@ -12,7 +10,6 @@ const Product = require('../models/product.js');
     4) Get all products by seller
     5) Get a single product by id
 */
-
 
 /*
     NOTES: 
@@ -31,92 +28,88 @@ const Product = require('../models/product.js');
 
 */
 
-// 1) Get all Products 
+// Get all Products
+const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
-exports.getAllProducts = async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
+// Get all available Products
+const getAvailableProducts = async (req, res) => {
+  try {
+    const availableProducts = await Product.find({ availability: true });
+    res.json(availableProducts);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get all products by category
+const getProductsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const products = await Product.find({ category });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get all products by seller
+const getProductsBySeller = async (req, res) => {
+  try {
+    const { seller } = req.params;
+    const products = await Product.find({ seller });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get a single product by id
+const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
     }
-}
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
-// 2) Get all available Products
+// Search function
+const searchProduct = async (req, res) => {
+  try {
+    const { q } = req.query;
 
-exports.getAvailableProducts = async (req, res) => {
-    try{
-        const availableProducts = await Product.find({availability: true});
-        res.json(availableProducts);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
+    if (!q) {
+      const products = await Product.find();
+      return res.json(products);
     }
-}
 
-// 3) Get all products by category
+    const products = await Product.find({
+      $or: [{ name: { $regex: q, $options: "i" } }],
+    });
 
-exports.getProductsByCategory = async (req, res) => {
-    try {
-        const { category } = req.params;
-        const products = await Product.find({ category });
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
-    }
-}
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
-// 4) Get all products by seller
-
-exports.getProductsBySeller = async (req,res) => {
-    try{
-        const { seller } = req.params;
-        const products = await Product.find({ seller });
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
-    }
-}
-
-// 5) Get a single product by id
-
-exports.getProductById = async (req, res) => {
-    try{
-        const { id } = req.params;
-        const product = await Product.findById(id);
-        if(!product) {
-            return res.status(404).json({ message: "Product not found" });
-        }
-        res.json(product);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
-    }
-}
-
-// SEARCH FUNCTION
-exports.searchProduct = async (req, res) => {
-    try {
-        const { q } = req.query;
-
-        // If the query is empty , return all available products
-        if(!q) {
-            // Will decide later whether to use all products or only the available products
-            const products = await Product.find();  // const products = await Product.find({availability: true});
-            return res.json(products);
-        }
-        
-        // Will decide the additional search criteria later
-        const products = await Product.find({
-            $or: [
-                { name: { $regex: q, $options: 'i' } },
-                /*
-                { description: { $regex: q, $options: 'i' } },
-                {category: { $regex: q, $options: 'i' } },
-                */
-            ],
-        });  
-
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ message: "Server error" });
-    }
-}
+// Export all functions
+module.exports = {
+  getAllProducts,
+  getAvailableProducts,
+  getProductsByCategory,
+  getProductsBySeller,
+  getProductById,
+  searchProduct,
+};
