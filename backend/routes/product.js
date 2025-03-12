@@ -22,4 +22,7 @@ router.get("/single/:id", productController.getProductById);
 // 6) Search Functionality
 router.get("/search", productController.searchProduct);
 
+// 7) Create a new product
+router.post("/create", productController.createProduct);
+
 module.exports = router;

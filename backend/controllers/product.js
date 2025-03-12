@@ -104,6 +104,31 @@ const searchProduct = async (req, res) => {
   }
 };
 
+// Create a new product
+const createProduct = async (req, res) => {
+  try {
+    const { name, price, category, availability, seller, description } = req.body;
+
+    // Create a new product instance
+    const newProduct = new Product({
+      name,
+      price,
+      category,
+      availability,
+      seller,
+      description,
+    });
+
+    // Save the product to the database
+    const savedProduct = await newProduct.save();
+
+    // Return the created product
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Export all functions
 module.exports = {
   getAllProducts,
@@ -112,4 +137,5 @@ module.exports = {
   getProductsBySeller,
   getProductById,
   searchProduct,
+  createProduct,
 };
