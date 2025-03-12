@@ -25,4 +25,7 @@ router.get("/search", productController.searchProduct);
 // 7) Create a new product
 router.post("/create", productController.createProduct);
 
+// 8) Update product
+router.put("/update/:id", productController.updateProduct);
+
 module.exports = router;
