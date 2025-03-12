@@ -22,4 +22,7 @@ router.get("/single/:id", productController.getProductById);
 // 6) Search Functionality
 router.get("/search", productController.searchProduct);
 
+// 7) Delete a product
+router.delete("/delete/:id", productController.deleteProduct);
+
 module.exports = router;

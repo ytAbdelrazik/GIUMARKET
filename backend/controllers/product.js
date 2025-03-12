@@ -9,6 +9,8 @@ const Product = require("../models/product.js");
     3) Get all products by category
     4) Get all products by seller
     5) Get a single product by id
+    6) Search Functionality
+    7) Delete a product
 */
 
 /*
@@ -104,6 +106,18 @@ const searchProduct = async (req, res) => {
   }
 };
 
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findByIdAndDelete(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json({ message: "Product deleted successfully" });
+  }catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }};
+
 // Export all functions
 module.exports = {
   getAllProducts,
@@ -112,4 +126,5 @@ module.exports = {
   getProductsBySeller,
   getProductById,
   searchProduct,
+  deleteProduct,
 };
