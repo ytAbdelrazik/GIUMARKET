@@ -162,4 +162,5 @@ module.exports = {
   getProductById,
   searchProduct,
   createProduct,
+  updateProduct
 };
