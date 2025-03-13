@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
+const userRoutes = require("./routes/user"); 
 const cors = require("cors");
 
 dotenv.config();
@@ -21,6 +22,9 @@ mongoose
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/users", userRoutes)
+
+
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
