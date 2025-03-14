@@ -109,16 +109,18 @@ const searchProduct = async (req, res) => {
 // Create a new product
 const createProduct = async (req, res) => {
   try {
-    const { name, price, category, availability, seller, description } = req.body;
+    const { name, price, category, quantity, condition, seller, description, images } = req.body;
 
     // Create a new product instance
     const newProduct = new Product({
       name,
       price,
       category,
-      availability,
+      quantity,
+      condition,
       seller,
       description,
+      images,
     });
 
     // Save the product to the database

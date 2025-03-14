@@ -5,6 +5,7 @@ const router = express.Router();
 // @route   GET /api/users
 // @desc    Get all users
 // @access  Public
+//TESTED-WORKING
 router.get("/", usersController.getAllUsers);
 
 // @route   PUT /api/users/:id
