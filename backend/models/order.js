@@ -30,9 +30,21 @@ const orderSchema = new mongoose.Schema({
     sellerProof: {
         type: String,
     },
+    status: {
+        type: String,
+        enum: ["pending", "completed", "canceled"],
+        default: "pending",
+    },
  }, 
  { timestamps: true }    
 );
+
+orderSchema.pre("save" , function (next) {
+    if ((!this.buyerReceipt || !this.sellerProof) && this.status === "completed") {
+        return next(new Error("Both buyerReceipt and sellerProof are required when the order is completed."));
+    }
+    next();
+});
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;
