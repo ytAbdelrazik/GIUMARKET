@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
 const userRoutes = require("./routes/users"); 
+const reservationRoutes = require("./routes/reservation");
 const cors = require("cors");
 
 dotenv.config();
@@ -23,6 +24,7 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes)
+app.use("/api/reservations", reservationRoutes);
 
 
 
