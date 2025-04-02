@@ -27,15 +27,21 @@ router.get("/single/:id", productController.getProductById);
 // 6) Search Functionality
 router.get("/search", productController.searchProduct);
 
+// POST REQUEST (ADD NEW PRODUCT)
+
 // 7) Create a new product
 //Tested-Working
 router.post("/create", productController.createProduct);
+
+// PUT REQUEST (UPDATE PRODUCT)
 
 // 8) Update product
 //Tested-Working
 router.put("/update/:id", productController.updateProduct);
 
-// 7) Delete a product
+// DELETE REQUEST (DELETE PRODUCT)
+
+// 9) Delete a product
 //Tested-Working
 router.delete("/delete/:id", productController.deleteProduct);
 
