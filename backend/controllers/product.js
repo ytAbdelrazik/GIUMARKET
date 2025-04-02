@@ -106,6 +106,57 @@ const searchProduct = async (req, res) => {
   }
 };
 
+// Create a new product
+const createProduct = async (req, res) => {
+  try {
+    const { name, price, category, quantity, condition, seller, description, images } = req.body;
+
+    // Create a new product instance
+    const newProduct = new Product({
+      name,
+      price,
+      category,
+      quantity,
+      condition,
+      seller,
+      description,
+      images,
+    });
+
+    // Save the product to the database
+    const savedProduct = await newProduct.save();
+
+    // Return the created product
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update a product
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, price, description } = req.body;
+
+    // Find the product by id and update the specified fields
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { name, price, description },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Return the updated product
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -126,5 +177,7 @@ module.exports = {
   getProductsBySeller,
   getProductById,
   searchProduct,
+  createProduct,
+  updateProduct,
   deleteProduct,
 };
