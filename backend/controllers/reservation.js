@@ -131,10 +131,38 @@ const rejectReservation = async (req, res) => {
   }
 };
 
+const cancelReservation = async (req, res) => {
+  try {
+    const { reservationId } = req.params;
+    const buyerId = req.user; // From auth middleware
+
+    // Find the reservation
+    const reservation = await Reservation.findOne({
+      _id: reservationId,
+      buyer: buyerId,
+      status: "pending", // Only pending reservations can be canceled
+    });
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found or cannot be canceled" });
+    }
+
+    // Update the reservation status to "canceled"
+    reservation.status = "canceled";
+    reservation.responseDate = Date.now();
+    await reservation.save();
+
+    res.json({ message: "Reservation canceled successfully", reservation });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   createReservation,
   getSellerReservations,
   getBuyerReservations,
   acceptReservation,
   rejectReservation,
+  cancelReservation,
 }; 

@@ -17,4 +17,6 @@ router.put("/accept/:reservationId", reservationController.acceptReservation);
 // Reject a reservation
 router.put("/reject/:reservationId", reservationController.rejectReservation);
 
+// Cancel a reservation
+router.put("/cancel/:reservationId", reservationController.cancelReservation);
 module.exports = router; 
