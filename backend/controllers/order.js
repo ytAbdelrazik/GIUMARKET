@@ -19,6 +19,44 @@ const path = require("path");
     3)The testing methodology for the image uploades is located in the Order routes file.
 */
 
+
+
+
+/*
+YT
+      **Function to mark a product as sold**
+  This function will be called after the order is completed and the payment is confirmed from seller
+   either button from gui or we can integrate it with the reciept uploading
+  It will update the product's availability status to false
+*/
+const markProductAsSold = async (orderId) => {
+    try {
+        const order = await Order.findById(orderId);
+        if (!order) {
+            throw new Error("Order not found");
+        }
+
+        // Ensure the order has a product ID associated
+        if (!order.product) {
+            throw new Error("No product associated with this order");
+        }
+
+        const product = await Product.findById(order.product);
+        if (!product) {
+            throw new Error("Product not found");
+        }
+
+        // Mark the product as sold
+        product.availability = false;
+        await product.save();
+
+        console.log(`Product ${product} marked as sold.`);
+    } catch (error) {
+        console.error("Error marking product as sold:", error);
+    }
+};
+
+
 // Function to delete the file locally if it exists
 const deleteFile = (filePath) => {
     if (fs.existsSync(filePath)) {
@@ -74,4 +112,4 @@ const uploadProof = async (req, res) => {
     }
 }
 
-module.exports = { uploadReceipt, uploadProof };
+module.exports = { uploadReceipt, uploadProof ,markProductAsSold};
