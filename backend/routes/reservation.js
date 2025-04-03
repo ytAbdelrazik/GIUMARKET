@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const reservationController = require("../controllers/reservation");
+const authMiddleware = require("../middleware/authMiddleware");
 
 // Create a reservation request
-router.post("/request/:productId", reservationController.createReservation);
+router.post("/request/:productId",authMiddleware, reservationController.createReservation);
 
 // Get all reservations for a seller
 router.get("/seller", reservationController.getSellerReservations);

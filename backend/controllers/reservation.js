@@ -41,6 +41,7 @@ const createReservation = async (req, res) => {
     res.status(201).json(reservation);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+    console.error(error); // Log the error for debugging
   }
 };
 
