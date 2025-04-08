@@ -159,7 +159,7 @@ const cancelReservation = async (req, res) => {
   }
 };
 
-const cancelReservation = async (req, res) => {
+const cancelReservationAX = async (req, res) => {
   try {
     const { reservationId } = req.params;
     const buyerId = req.user; // From auth middleware
@@ -203,4 +203,5 @@ module.exports = {
   acceptReservation,
   rejectReservation,
   cancelReservation,
+  cancelReservationAX,
 }; 
