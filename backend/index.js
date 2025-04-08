@@ -6,9 +6,13 @@ const socketIo = require("socket.io");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
 
+const reservationRoutes = require("./routes/reservation");
+
+
 const userRoutes = require("./routes/users");
 const chatRoutes = require("./routes/chat"); // We'll create this
 const orderRoutes = require("./routes/order");
+
 
 const cors = require("cors");
 const { setupSocketIO } = require("./socket"); // We'll create this
@@ -44,6 +48,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 
 app.use("/api/users", userRoutes)
+
+app.use("/api/reservations", reservationRoutes);
+
 app.use("/api/orders", orderRoutes);
 
 
