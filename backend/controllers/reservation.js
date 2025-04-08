@@ -159,6 +159,43 @@ const cancelReservation = async (req, res) => {
   }
 };
 
+const cancelReservation = async (req, res) => {
+  try {
+    const { reservationId } = req.params;
+    const buyerId = req.user; // From auth middleware
+
+    // Find the reservation
+    const reservation = await Reservation.findOne({
+      _id: reservationId,
+      buyer: buyerId,
+      status: "pending", // Only pending reservations can be canceled
+    });
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found or cannot be canceled" });
+    }
+
+    // Check if 48 hours have passed since the reservation was created
+    const now = new Date();
+    const createdAt = new Date(reservation.createdAt);
+    const diffInHours = (now - createdAt) / (1000 * 60 * 60); // milliseconds to hours
+
+    if (diffInHours > 48) {
+      return res.status(400).json({ message: "Reservation can no longer be canceled after 48 hours" });
+    }
+
+    // Update the reservation status to "canceled"
+    reservation.status = "canceled";
+    reservation.responseDate = Date.now();
+    await reservation.save();
+
+    res.json({ message: "Reservation canceled successfully", reservation });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 module.exports = {
   createReservation,
   getSellerReservations,
