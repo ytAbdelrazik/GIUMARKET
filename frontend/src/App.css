@@ -18,7 +18,7 @@
 }
 
 .hero-section {
-  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/campus-bg.jpg');
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('./giu_bg.jpeg');
   background-size: cover;
   background-position: center;
   color: white;
