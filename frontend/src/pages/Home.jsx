@@ -11,6 +11,8 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
 
+  const isLoggedIn = localStorage.getItem('user') ? true : false
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -113,10 +115,13 @@ const Home = () => {
             </div>
           </form>
           
-          <div className="mt-4">
-            <Link to="/signup" className="btn btn-outline-light btn-lg me-2">Sign Up</Link>
-            <Link to="/login" className="btn btn-light btn-lg">Login</Link>
-          </div>
+          {/* Render Sign Up and Login buttons only if not logged in */}
+          {!isLoggedIn && (
+            <div className="mt-4">
+              <Link to="/signup" className="btn btn-outline-light btn-lg me-2">Sign Up</Link>
+              <Link to="/login" className="btn btn-light btn-lg">Login</Link>
+            </div>
+          )}
         </div>
       </section>
       
