@@ -27,6 +27,7 @@ app.use("/api/users", userRoutes)
 app.use("/api/reservations", reservationRoutes);
 
 
+console.log("MONGODB_URI:", process.env.MONGODB_URI);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

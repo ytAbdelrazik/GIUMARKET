@@ -9,6 +9,7 @@ import Signup from './pages/Signup'
 import Chat from './pages/Chat'
 import AdminDashboard from './pages/AdminDashboard'
 import ProductDetail from './pages/ProductDetail'
+import Profile from './pages/Profile'
 
 // Components
 import Navbar from './components/Navbar'
@@ -79,6 +80,14 @@ function App() {
                 <AdminRoute>
                   <AdminDashboard />
                 </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Profile user={user} />
+                </ProtectedRoute>
               } 
             />
             <Route path="*" element={<Navigate to="/" />} />
