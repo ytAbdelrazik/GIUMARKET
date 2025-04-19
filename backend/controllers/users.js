@@ -15,11 +15,20 @@ const getAllUsers = async (req, res) => {
 // Update user profile
 const updateUserProfile = async (req, res) => {
   try {
+    console.log('Update profile request received:', {
+      params: req.params,
+      body: req.body,
+      user: req.user
+    });
+
     const { name, email, phoneNumber, password } = req.body;
 
     // Find the user by ID
     let user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      console.log('User not found with ID:', req.params.id);
+      return res.status(404).json({ message: "User not found" });
+    }
 
     // Update fields if provided
     if (name) user.name = name;
@@ -34,10 +43,20 @@ const updateUserProfile = async (req, res) => {
 
     // Save updated user
     await user.save();
-    res.json({ message: "Profile updated successfully", user });
+    
+    // Send only necessary user information
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber
+    };
+    
+    console.log('Sending success response:', { user: userResponse });
+    res.json({ message: "Profile updated successfully", user: userResponse });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error('Error in updateUserProfile:', err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
