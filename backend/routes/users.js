@@ -14,4 +14,9 @@ router.get("/", usersController.getAllUsers);
 // @access  Private
 router.put("/:id", authMiddleware, usersController.updateUserProfile);
 
+// @route   DELETE /api/users/delete
+// @desc    Delete user account
+// @access  Private
+router.delete('/delete', authMiddleware, usersController.deleteUser)
+
 module.exports = router;
