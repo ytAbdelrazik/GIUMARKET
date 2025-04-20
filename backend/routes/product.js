@@ -1,8 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const productController = require('../controllers/product');
+const productController = require("../controllers/product");
+const authMiddleware = require("../middleware/authMiddleware"); // Updated import for auth middleware
 
-// GET REQUESTS (SHOW PRODUCTS AND SEARCH FUNCTION) 
+// GET REQUESTS (SHOW PRODUCTS AND SEARCH FUNCTION)
 
 // 1) Get all Products
 //Tested-Working
@@ -27,15 +28,21 @@ router.get("/single/:id", productController.getProductById);
 // 6) Search Functionality
 router.get("/search", productController.searchProduct);
 
+// POST REQUEST (ADD NEW PRODUCT)
+
 // 7) Create a new product
 //Tested-Working
-router.post("/create", productController.createProduct);
+router.post("/create", authMiddleware, productController.createProduct);
+
+// PUT REQUEST (UPDATE PRODUCT)
 
 // 8) Update product
 //Tested-Working
 router.put("/update/:id", productController.updateProduct);
 
-// 7) Delete a product
+// DELETE REQUEST (DELETE PRODUCT)
+
+// 9) Delete a product
 //Tested-Working
 router.delete("/delete/:id", productController.deleteProduct);
 
