@@ -5,6 +5,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
+const reportRoutes = require("./routes/ReportRoutes");
 
 const reservationRoutes = require("./routes/reservation");
 
@@ -56,6 +57,7 @@ app.use("/api/orders", orderRoutes);
 
 
 app.use("/api/chat", chatRoutes);
+app.use("/api/reports", reportRoutes);
 
 
 const PORT = process.env.PORT || 8080;
