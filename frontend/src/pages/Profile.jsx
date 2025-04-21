@@ -15,6 +15,7 @@ const Profile = ({ user, setUser }) => {
     password: ''
   })
   const [deleteError, setDeleteError] = useState('')
+  const [products, setProducts] = useState([]); // State to store products
 
   useEffect(() => {
     if (!user) {
@@ -27,6 +28,34 @@ const Profile = ({ user, setUser }) => {
       phone: user.phone || user.phoneNumber || ''
     })
     setLoading(false)
+
+    // Fetch products by seller
+    const fetchProducts = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No authentication token found. Please log in again.");
+        }
+
+        const backendUrl = "http://localhost:8080";
+        const res = await fetch(`${backendUrl}/api/products/seller/${user.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch products.");
+        }
+
+        const data = await res.json();
+        setProducts(data); // Set the fetched products
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
   }, [user, navigate])
 
   const handleChange = (e) => {
@@ -180,8 +209,8 @@ const Profile = ({ user, setUser }) => {
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="card shadow">
+        <div className="col-md-6">
+          <div className="card shadow mb-4">
             <div className="card-header bg-primary text-white">
               <h2 className="mb-0">My Profile</h2>
             </div>
@@ -255,7 +284,7 @@ const Profile = ({ user, setUser }) => {
           </div>
 
           {/* Delete Account Section */}
-          <div className="card shadow mt-4 border-danger">
+          <div className="card shadow border-danger">
             <div className="card-header bg-danger text-white">
               <h4 className="mb-0">Delete Account</h4>
             </div>
@@ -269,6 +298,30 @@ const Profile = ({ user, setUser }) => {
               >
                 Delete My Account
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar Section */}
+        <div className="col-md-4">
+          <div className="card shadow">
+            <div className="card-header bg-secondary text-white">
+              <h4 className="mb-0">My Products</h4>
+            </div>
+            <div className="card-body">
+              {products.length > 0 ? (
+                <ul className="list-group">
+                  {products.map((product) => (
+                    <li key={product._id} className="list-group-item">
+                      <h5>{product.name}</h5>
+                      <p>Price: ${product.price}</p>
+                      <p>Category: {product.category}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No products found.</p>
+              )}
             </div>
           </div>
         </div>
