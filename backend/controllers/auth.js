@@ -58,6 +58,12 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    // Check if the user is banned
+    if (user.isBanned) {
+      console.log('User is banned');
+      return res.status(403).json({ message: "Your account has been banned. Please contact admins." });
+    }
+
     console.log('User found, checking password');
     // Check password
     const isMatch = await user.comparePassword(password);

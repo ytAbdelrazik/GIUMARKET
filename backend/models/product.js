@@ -70,6 +70,19 @@ const productSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+
+    isApproved: {
+      type: Boolean,
+      default: false,
+    },
+    flags: {
+      type: Number,
+      default: 0,
+    },
+    isFlagged: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

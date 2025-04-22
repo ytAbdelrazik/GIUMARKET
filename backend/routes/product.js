@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/product');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // GET REQUESTS (SHOW PRODUCTS AND SEARCH FUNCTION) 
 
@@ -44,5 +45,8 @@ router.put("/update/:id", productController.updateProduct);
 // 9) Delete a product
 //Tested-Working
 router.delete("/delete/:id", productController.deleteProduct);
+
+
+router.put("/flag/:id",authMiddleware.authMiddleware, authMiddleware.adminMiddleware, productController.flagProduct);
 
 module.exports = router;

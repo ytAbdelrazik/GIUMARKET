@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const User = require("../models/user");
 
 dotenv.config();
 
@@ -19,4 +20,18 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-module.exports = authMiddleware;
+const adminMiddleware = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user);
+
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = {adminMiddleware, authMiddleware};

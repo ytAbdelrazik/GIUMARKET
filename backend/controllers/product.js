@@ -169,6 +169,26 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }};
 
+
+// Flag a product (for admin use)
+const flagProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    product.flags += 1;
+    await product.save();
+
+    res.json({ message: "Product flagged successfully", product });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 // Export all functions
 module.exports = {
   getAllProducts,
@@ -180,4 +200,5 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  flagProduct
 };
