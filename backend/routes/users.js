@@ -8,11 +8,6 @@ const router = express.Router();
 //TESTED-WORKING
 router.get("/", usersController.getAllUsers);
 
-// @route   GET /api/users/:id
-// @desc    Get user by ID
-// @access  Public
-router.get("/:id", usersController.getUserById);
-
 // @route   PUT /api/users/:id
 // @desc    Update user profile
 // @access  Public

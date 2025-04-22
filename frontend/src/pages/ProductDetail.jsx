@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import axios from 'axios'
 
 const ProductDetail = ({ user }) => {
@@ -10,7 +10,6 @@ const ProductDetail = ({ user }) => {
   const [reserving, setReserving] = useState(false)
   const [reservationSuccess, setReservationSuccess] = useState(false)
   const [reservationError, setReservationError] = useState(null)
-  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -49,24 +48,6 @@ const ProductDetail = ({ user }) => {
     } finally {
       setReserving(false)
     }
-  }
-
-  const handleContactSeller = () => {
-    if (!user) {
-      return setReservationError('Please login to contact the seller')
-    }
-
-    // Store product and seller info in localStorage to use in chat
-    const chatInfo = {
-      productId: product._id,
-      sellerId: product.seller,
-      productName: product.name
-    }
-    
-    localStorage.setItem('currentProductChat', JSON.stringify(chatInfo))
-    
-    // Navigate to chat page
-    navigate('/chat')
   }
 
   if (loading) {
@@ -195,12 +176,9 @@ const ProductDetail = ({ user }) => {
                 )}
                 
                 {user && (
-                  <button 
-                    className="btn btn-outline-secondary"
-                    onClick={handleContactSeller}
-                  >
+                  <Link to="/chat" className="btn btn-outline-secondary">
                     <i className="bi bi-chat-dots me-1"></i> Contact Seller
-                  </button>
+                  </Link>
                 )}
               </div>
             </div>

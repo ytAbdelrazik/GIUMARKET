@@ -12,10 +12,6 @@ import ProductDetail from './pages/ProductDetail'
 
 // Components
 import Navbar from './components/Navbar'
-import MessageNotification from './components/MessageNotification'
-
-// Services
-import socketService from './services/socketService'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -32,14 +28,6 @@ function App() {
     
     setLoading(false)
   }, [])
-
-  // Connect socket when user is logged in
-  useEffect(() => {
-    if (user) {
-      // Initialize socket connection
-      socketService.connect();
-    }
-  }, [user]);
 
   // Protected route component
   const ProtectedRoute = ({ children }) => {
@@ -71,7 +59,6 @@ function App() {
     <Router>
       <div className="app">
         <Navbar user={user} setUser={setUser} />
-        {user && <MessageNotification userId={user.id} />}
         <div className="content">
           <Routes>
             <Route path="/" element={<Home />} />

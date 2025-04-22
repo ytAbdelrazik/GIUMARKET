@@ -126,48 +126,9 @@ export const userService = {
   },
 };
 
-// Chat Services
-export const chatService = {
-  // Get messages between two users for a specific product
-  getMessages: async (user1Id, user2Id, productId) => {
-    const response = await apiClient.get(`/chat/${user1Id}/${user2Id}/${productId}`);
-    return response.data;
-  },
-
-  // Get all conversations for the current user
-  getConversations: async () => {
-    const response = await apiClient.get("/chat/conversations");
-    return response.data;
-  },
-
-  // Send a message (HTTP fallback if socket fails)
-  sendMessage: async (sender, receiver, text, productId) => {
-    const response = await apiClient.post("/chat/send", {
-      sender,
-      receiver,
-      text,
-      productId,
-    });
-    return response.data;
-  },
-
-  // Get user details by ID
-  getUserById: async (userId) => {
-    const response = await apiClient.get(`/users/${userId}`);
-    return response.data;
-  },
-
-  // Mark message as read
-  markAsRead: async (messageId) => {
-    const response = await apiClient.patch(`/chat/read/${messageId}`);
-    return response.data;
-  },
-};
-
 export default {
   auth: authService,
   products: productService,
   reservations: reservationService,
   users: userService,
-  chat: chatService,
 };

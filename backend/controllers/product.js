@@ -109,16 +109,7 @@ const searchProduct = async (req, res) => {
 // Create a new product
 const createProduct = async (req, res) => {
   try {
-    const { name, price, category, quantity, condition, description, images } = req.body;
-
-    // Get the seller ID from the authenticated user
-    const seller = req.user; // This assumes you're using authMiddleware which sets req.user
-
-    if (!seller) {
-      return res.status(400).json({ message: "Seller ID is required. Please ensure you're authenticated." });
-    }
-
-    console.log("Creating product with seller ID:", seller);
+    const { name, price, category, quantity, condition, seller, description, images } = req.body;
 
     // Create a new product instance
     const newProduct = new Product({
@@ -127,7 +118,7 @@ const createProduct = async (req, res) => {
       category,
       quantity,
       condition,
-      seller, // Use the authenticated user's ID as seller
+      seller,
       description,
       images,
     });
@@ -138,8 +129,7 @@ const createProduct = async (req, res) => {
     // Return the created product
     res.status(201).json(savedProduct);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -175,10 +165,9 @@ const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
     res.json({ message: "Product deleted successfully" });
-  } catch (error) {
+  }catch (error) {
     res.status(500).json({ message: "Server error" });
-  }
-};
+  }};
 
 
 // Flag a product (for admin use)

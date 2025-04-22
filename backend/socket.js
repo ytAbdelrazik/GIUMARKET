@@ -13,22 +13,9 @@ const setupSocketIO = (io) => {
     socket.on("sendMessage", async ({ sender, receiver, text, productId }) => {
       try {
         const room = [sender, receiver, productId].sort().join("_");
-
-        // Create and save message to database
-        const message = new Message({
-          room,
-          sender,
-          text,
-          productId,
-          // Ensure we have consistent creation time
-          createdAt: new Date(),
-        });
-
-        const savedMessage = await message.save();
-        console.log("Message saved to database:", savedMessage._id);
-
-        // Broadcast to room
-        io.to(room).emit("receiveMessage", savedMessage);
+        const message = new Message({ room, sender, text, productId });
+        await message.save();
+        io.to(room).emit("receiveMessage", message);
       } catch (error) {
         console.error("Error saving message:", error);
       }
@@ -36,7 +23,7 @@ const setupSocketIO = (io) => {
 
     socket.on("markAsRead", async ({ messageId }) => {
       try {
-        const updatedMessage = await Message.findByIdAndUpdate(messageId, { read: true }, { new: true });
+        await Message.findByIdAndUpdate(messageId, { read: true });
         console.log("Message marked as read", messageId);
       } catch (error) {
         console.error("Error marking message as read:", error);
