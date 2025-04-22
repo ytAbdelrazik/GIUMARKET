@@ -118,8 +118,14 @@ const Home = () => {
           {/* Render Sign Up and Login buttons only if not logged in */}
           {!isLoggedIn && (
             <div className="mt-4">
-              <Link to="/signup" className="btn btn-outline-light btn-lg me-2">Sign Up</Link>
-              <Link to="/login" className="btn btn-light btn-lg">Login</Link>
+            {localStorage.getItem('token') ? (
+              <p className="text-light">Welcome back!</p>
+            ) : (
+              <>
+                  <Link to="/signup" className="btn btn-outline-light btn-lg me-2">Sign Up</Link>
+                  <Link to="/login" className="btn btn-light btn-lg">Login</Link>
+              </>
+            )}
             </div>
           )}
         </div>
