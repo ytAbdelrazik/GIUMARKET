@@ -7,6 +7,7 @@ const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
 const adminRoutes = require("./routes/admin");
 
+const reportRoutes = require("./routes/ReportRoutes");
 
 const reservationRoutes = require("./routes/reservation");
 
@@ -53,6 +54,7 @@ app.use("/api/users", userRoutes)
 app.use("/api/reservations", reservationRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/reports", reportRoutes);
 
 
 const PORT = process.env.PORT || 8080;
