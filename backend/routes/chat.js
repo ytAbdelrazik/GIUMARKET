@@ -8,12 +8,12 @@ const router = express.Router();
 router.get("/conversations", authMiddleware, getConversations);
 
 // Get messages for a specific chat
-router.get("/:user1/:user2/:productId", getMessages);
+router.get("/:user1/:user2/:productId", authMiddleware, getMessages);
 
 // Send a message
-router.post("/send", sendMessage);
+router.post("/send", authMiddleware, sendMessage);
 
 // Mark message as read
-router.patch("/read/:messageId", markAsRead);
+router.patch("/read/:messageId", authMiddleware, markAsRead);
 
 module.exports = router;

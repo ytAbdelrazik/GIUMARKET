@@ -38,12 +38,12 @@ router.post("/create", authMiddleware, productController.createProduct);
 
 // 8) Update product
 //Tested-Working
-router.put("/update/:id", productController.updateProduct);
+router.put("/update/:id", authMiddleware, productController.updateProduct);
 
 // DELETE REQUEST (DELETE PRODUCT)
 
 // 9) Delete a product
 //Tested-Working
-router.delete("/delete/:id", productController.deleteProduct);
+router.delete("/delete/:id", authMiddleware, productController.deleteProduct);
 
 module.exports = router;
