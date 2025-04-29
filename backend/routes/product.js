@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/product");
 const authMiddleware = require("../middleware/authMiddleware"); // Updated import for auth middleware
+const adminOnly = require("../middleware/adminOnly.js");
 
 // GET REQUESTS (SHOW PRODUCTS AND SEARCH FUNCTION)
 
-// 1) Get all Products
-//Tested-Working
-router.get("/all", productController.getAllProducts);
+// 1) Get all Products (Admin only)
+router.get("/all", authMiddleware, adminOnly, productController.getAllProducts);
 
 // 2) Get all available Products
 //Tested-Working
@@ -42,8 +42,7 @@ router.put("/update/:id", authMiddleware, productController.updateProduct);
 
 // DELETE REQUEST (DELETE PRODUCT)
 
-// 9) Delete a product
-//Tested-Working
-router.delete("/delete/:id", authMiddleware, productController.deleteProduct);
+// 9) Delete a product (Admin only)
+router.delete("/delete/:id", authMiddleware, adminOnly, productController.deleteProduct);
 
 module.exports = router;

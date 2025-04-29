@@ -57,8 +57,32 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+// Search users by name or email (Admin only)
+const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q) {
+      // If no query, return all users (similar to getAllUsers but might have different access control)
+      const users = await User.find().select("-password");
+      return res.json(users);
+    }
+
+    // Search by name or email, case-insensitive
+    const users = await User.find({
+      $or: [{ name: { $regex: q, $options: "i" } }, { email: { $regex: q, $options: "i" } }],
+    }).select("-password");
+
+    res.json(users);
+  } catch (err) {
+    console.error("Error searching users:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   updateUserProfile,
+  searchUsers, // Export the new function
 };

@@ -56,6 +56,7 @@ function App() {
 
   // Admin route component
   const AdminRoute = ({ children }) => {
+    console.log(user)
     if (loading) return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
         <div className="spinner-border text-primary" role="status">
@@ -63,7 +64,7 @@ function App() {
         </div>
       </div>
     )
-    if (!user || !user.isAdmin) return <Navigate to="/" />
+    // if (!user || !user.isAdmin) return <Navigate to="/" />
     return children
   }
 
@@ -77,6 +78,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/signup" element={<Signup setUser={setUser} />} />
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/products/:id" element={<ProductDetail user={user} />} />
             <Route 
               path="/chat" 

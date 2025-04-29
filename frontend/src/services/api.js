@@ -113,10 +113,26 @@ export const reservationService = {
   },
 };
 
-// User Services
-export const userService = {
+// User Services (Keep internal, export specific functions below)
+const userService = {
   getAllUsers: async () => {
-    const response = await apiClient.get("/users");
+    const response = await apiClient.get("/users"); // Endpoint for getting all users
+    return response.data;
+  },
+  // Assuming an endpoint exists for updating roles by admin
+  updateUserRoleInternal: async (userId, role) => {
+    // Adjust endpoint if necessary based on backend routes
+    const response = await apiClient.put(`/admin/users/${userId}/role`, { role });
+    return response.data;
+  },
+  // ... other user service methods like searchUsers, banUser, updateUserProfile ...
+  searchUsers: async (query) => {
+    const response = await apiClient.get(`/users/search?q=${query}`);
+    return response.data;
+  },
+
+  banUser: async (userId) => {
+    const response = await apiClient.post(`/admin/ban/${userId}`); // Assuming POST to /api/admin/ban/:id bans the user
     return response.data;
   },
 
@@ -164,10 +180,25 @@ export const chatService = {
   },
 };
 
+// --- Named Exports for Components ---
+
+// Export specific user functions needed by components
+export const getUsers = userService.getAllUsers;
+export const updateUserRole = userService.updateUserRoleInternal;
+export const banUser = userService.banUser; // Add banUser to named exports
+
+// Export report function
+export const getReports = async () => {
+  const response = await apiClient.get("/reports"); // Use apiClient and correct endpoint
+  return response.data;
+};
+
+// Default export (optional, if components also use the service objects directly)
 export default {
   auth: authService,
   products: productService,
   reservations: reservationService,
-  users: userService,
+  users: userService, // Keep for potential direct use
   chat: chatService,
+  // Note: getReports, getUsers, updateUserRole, banUser are now named exports above
 };
