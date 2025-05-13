@@ -5,7 +5,7 @@ const Product = require("../models/product");
 const createReservation = async (req, res) => {
   try {
     const { productId } = req.params;
-    const buyerId = req.user; // From auth middleware
+    const buyerId = req.user.id; // Get the ID from the user object
 
     // Find the product
     const product = await Product.findById(productId);
@@ -40,15 +40,15 @@ const createReservation = async (req, res) => {
 
     res.status(201).json(reservation);
   } catch (error) {
+    console.error("Create reservation error:", error);
     res.status(500).json({ message: "Server error" });
-    console.error(error); // Log the error for debugging
   }
 };
 
 // Get all reservations for a seller
 const getSellerReservations = async (req, res) => {
   try {
-    const sellerId = req.user;
+    const sellerId = req.user.id; // Get the ID from the user object
     const reservations = await Reservation.find({ seller: sellerId })
       .populate("product")
       .populate("buyer", "name email phoneNumber");
@@ -61,7 +61,7 @@ const getSellerReservations = async (req, res) => {
 // Get all reservations for a buyer
 const getBuyerReservations = async (req, res) => {
   try {
-    const buyerId = req.user;
+    const buyerId = req.user.id; // Get the ID from the user object
     const reservations = await Reservation.find({ buyer: buyerId })
       .populate("product")
       .populate("seller", "name email phoneNumber");
@@ -75,7 +75,7 @@ const getBuyerReservations = async (req, res) => {
 const acceptReservation = async (req, res) => {
   try {
     const { reservationId } = req.params;
-    const sellerId = req.user;
+    const sellerId = req.user.id; // Get the ID from the user object
 
     const reservation = await Reservation.findOne({
       _id: reservationId,
@@ -110,7 +110,7 @@ const acceptReservation = async (req, res) => {
 const rejectReservation = async (req, res) => {
   try {
     const { reservationId } = req.params;
-    const sellerId = req.user;
+    const sellerId = req.user.id; // Get the ID from the user object
 
     const reservation = await Reservation.findOne({
       _id: reservationId,
@@ -135,7 +135,7 @@ const rejectReservation = async (req, res) => {
 const cancelReservation = async (req, res) => {
   try {
     const { reservationId } = req.params;
-    const buyerId = req.user; // From auth middleware
+    const buyerId = req.user.id; // Get the ID from the user object
 
     // Find the reservation
     const reservation = await Reservation.findOne({
@@ -162,7 +162,7 @@ const cancelReservation = async (req, res) => {
 const cancelReservationAX = async (req, res) => {
   try {
     const { reservationId } = req.params;
-    const buyerId = req.user; // From auth middleware
+    const buyerId = req.user.id; // Get the ID from the user object
 
     // Find the reservation
     const reservation = await Reservation.findOne({
@@ -194,7 +194,6 @@ const cancelReservationAX = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 module.exports = {
   createReservation,

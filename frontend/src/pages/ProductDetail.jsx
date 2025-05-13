@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { productApi, reservationApi } from '../services/api'
+import ProductManagement from '../components/ProductManagement'
 
 const ProductDetail = ({ user }) => {
   const { id } = useParams()
@@ -15,7 +16,7 @@ const ProductDetail = ({ user }) => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/products/single/${id}`)
+        const response = await productApi.getProductById(id)
         setProduct(response.data)
         setLoading(false)
       } catch (err) {
@@ -37,11 +38,7 @@ const ProductDetail = ({ user }) => {
     setReservationError(null)
     
     try {
-      const token = localStorage.getItem('token')
-      await axios.post(`http://localhost:8080/api/reservations/request/${id}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      
+      await reservationApi.createReservation(id)
       setReservationSuccess(true)
     } catch (err) {
       console.error('Reservation error:', err)
@@ -56,17 +53,28 @@ const ProductDetail = ({ user }) => {
       return setReservationError('Please login to contact the seller')
     }
 
-    // Store product and seller info in localStorage to use in chat
-    const chatInfo = {
-      productId: product._id,
-      sellerId: product.seller,
-      productName: product.name
+    // Get seller ID, handling both populated and unpopulated cases
+    const sellerId = product.seller?._id || product.seller
+    if (!sellerId) {
+      setReservationError('Unable to contact seller: Seller information not available')
+      return
     }
-    
-    localStorage.setItem('currentProductChat', JSON.stringify(chatInfo))
-    
-    // Navigate to chat page
-    navigate('/chat')
+
+    // Don't allow users to chat with themselves
+    if (sellerId === user.id) {
+      setReservationError('You cannot chat with yourself')
+      return
+    }
+
+    navigate(`/chat/${sellerId}`)
+  }
+
+  const handleProductUpdate = (updatedProduct) => {
+    setProduct(updatedProduct)
+  }
+
+  const handleProductDelete = () => {
+    navigate('/')
   }
 
   if (loading) {
@@ -90,6 +98,12 @@ const ProductDetail = ({ user }) => {
       </div>
     )
   }
+
+  // Check if user is authenticated and is the owner of the product
+  const isOwner = user && product && (
+    (product.seller._id === user.id) || 
+    (product.seller === user.id)
+  )
 
   return (
     <div className="container mt-5">
@@ -167,13 +181,15 @@ const ProductDetail = ({ user }) => {
                         Reservation request sent successfully! Check your messages for updates.
                       </div>
                     ) : (
-                      <button 
-                        className="btn btn-primary btn-lg" 
-                        onClick={handleReservation}
-                        disabled={reserving || !user}
-                      >
-                        {reserving ? 'Sending Request...' : 'Request Reservation'}
-                      </button>
+                      !isOwner && (
+                        <button 
+                          className="btn btn-primary btn-lg" 
+                          onClick={handleReservation}
+                          disabled={reserving || !user}
+                        >
+                          {reserving ? 'Sending Request...' : 'Request Reservation'}
+                        </button>
+                      )
                     )}
                     
                     {reservationError && (
@@ -194,7 +210,7 @@ const ProductDetail = ({ user }) => {
                   </button>
                 )}
                 
-                {user && (
+                {user && !isOwner && (
                   <button 
                     className="btn btn-outline-secondary"
                     onClick={handleContactSeller}
@@ -205,6 +221,15 @@ const ProductDetail = ({ user }) => {
               </div>
             </div>
           </div>
+
+          {/* Only show ProductManagement if user is authenticated and is the owner */}
+          {isOwner && (
+            <ProductManagement 
+              product={product}
+              onUpdate={handleProductUpdate}
+              onDelete={handleProductDelete}
+            />
+          )}
         </div>
       </div>
     </div>

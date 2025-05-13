@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  getUsers,
-  banUser,
-  getReports,
-  productService,
-} from "../services/api";
+import { adminApi, productApi } from "../services/api";
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("users"); // 'users', 'products', 'reports'
@@ -22,13 +17,14 @@ function AdminDashboard() {
     products: null,
     reports: null,
   });
+  const [stats, setStats] = useState(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading((prev) => ({ ...prev, users: true }));
     setError((prev) => ({ ...prev, users: null }));
     try {
-      const fetchedUsers = await getUsers();
-      setUsers(fetchedUsers);
+      const response = await adminApi.getAllUsers();
+      setUsers(response.data);
     } catch (err) {
       console.error("Error fetching users:", err);
       setError((prev) => ({ ...prev, users: "Failed to fetch users." }));
@@ -41,8 +37,8 @@ function AdminDashboard() {
     setLoading((prev) => ({ ...prev, products: true }));
     setError((prev) => ({ ...prev, products: null }));
     try {
-      const fetchedProducts = await productService.getAllProducts();
-      setProducts(fetchedProducts);
+      const response = await productApi.getAvailableProducts();
+      setProducts(response.data);
     } catch (err) {
       console.error("Error fetching products:", err);
       setError((prev) => ({ ...prev, products: "Failed to fetch products." }));
@@ -55,9 +51,9 @@ function AdminDashboard() {
     setLoading((prev) => ({ ...prev, reports: true }));
     setError((prev) => ({ ...prev, reports: null }));
     try {
-      const fetchedReports = await getReports();
+      const response = await adminApi.getUserReports();
       setReports(
-        fetchedReports.map((report) => ({
+        response.data.map((report) => ({
           ...report,
           reporterName: report.reporterId?.name || "N/A",
           reportedUserName: report.reportedUserId?.name || "N/A",
@@ -73,16 +69,26 @@ function AdminDashboard() {
     }
   }, []);
 
+  const fetchStats = async () => {
+    try {
+      const response = await adminApi.getSystemStats();
+      setStats(response.data);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchProducts();
     fetchReports();
+    fetchStats();
   }, [fetchUsers, fetchProducts, fetchReports]);
 
   const handleBanUser = async (userId) => {
     if (window.confirm("Are you sure you want to ban this user?")) {
       try {
-        await banUser(userId);
+        await adminApi.banUser(userId);
         setUsers(
           users.map((user) =>
             user._id === userId ? { ...user, isBanned: true } : user
@@ -103,10 +109,34 @@ function AdminDashboard() {
     }
   };
 
+  const handleUnbanUser = async (userId) => {
+    if (window.confirm("Are you sure you want to unban this user?")) {
+      try {
+        await adminApi.unbanUser(userId);
+        setUsers(
+          users.map((user) =>
+            user._id === userId ? { ...user, isBanned: false } : user
+          )
+        );
+        setReports(
+          reports.map((report) =>
+            report.reportedUserIdValue === userId
+              ? { ...report, reportedUserBanned: false }
+              : report
+          )
+        );
+        alert("User unbanned successfully.");
+      } catch (err) {
+        console.error("Error unbanning user:", err);
+        alert(`Failed to unban user: ${err.response?.data?.message || err.message}`);
+      }
+    }
+  };
+
   const handleDeleteProduct = async (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await productService.deleteProduct(productId);
+        await productApi.deleteProduct(productId);
         setProducts(products.filter((product) => product._id !== productId));
         alert("Product deleted successfully.");
       } catch (err) {
@@ -166,13 +196,19 @@ function AdminDashboard() {
                   )}
                 </td>
                 <td>
-                  {!user.isBanned && (
+                  {user.isBanned ? (
+                    <button
+                      onClick={() => handleUnbanUser(user._id)}
+                      className="btn btn-success btn-sm"
+                    >
+                      Unban
+                    </button>
+                  ) : (
                     <button
                       onClick={() => handleBanUser(user._id)}
                       className="btn btn-danger btn-sm"
-                      disabled={user.type === "admin"}
                     >
-                      Ban User
+                      Ban
                     </button>
                   )}
                 </td>
@@ -317,6 +353,43 @@ function AdminDashboard() {
         {activeTab === "products" && renderProductsTab()}
         {activeTab === "reports" && renderReportsTab()}
       </div>
+
+      {stats && (
+        <div className="row mt-4">
+          <div className="col-md-3">
+            <div className="card bg-primary text-white">
+              <div className="card-body">
+                <h5 className="card-title">Total Users</h5>
+                <p className="card-text display-6">{stats.totalUsers}</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card bg-success text-white">
+              <div className="card-body">
+                <h5 className="card-title">Active Products</h5>
+                <p className="card-text display-6">{stats.activeProducts}</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card bg-info text-white">
+              <div className="card-body">
+                <h5 className="card-title">Total Sales</h5>
+                <p className="card-text display-6">${stats.totalSales}</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card bg-warning text-white">
+              <div className="card-body">
+                <h5 className="card-title">Pending Reports</h5>
+                <p className="card-text display-6">{stats.pendingReports}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,8 +11,9 @@ const adminRoutes = require("./routes/admin");
 const reservationRoutes = require("./routes/reservation");
 
 const userRoutes = require("./routes/users");
-const chatRoutes = require("./routes/chat"); // We'll create this
 const orderRoutes = require("./routes/order");
+const messageRoutes = require("./routes/message");
+const conversationRoutes = require("./routes/conversation");
 
 const cors = require("cors");
 const { setupSocketIO } = require("./socket"); // We'll create this
@@ -53,10 +54,11 @@ app.use("/api/reservations", reservationRoutes);
 
 app.use("/api/orders", orderRoutes);
 
-app.use("api/admin", adminRoutes);
+app.use("/api/admin", adminRoutes);
 
-app.use("/api/chat", chatRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {

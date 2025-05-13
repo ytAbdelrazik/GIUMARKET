@@ -10,6 +10,9 @@ const Home = () => {
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [sortBy, setSortBy] = useState('');
 
   const isLoggedIn = localStorage.getItem('user') ? true : false
 
@@ -43,18 +46,25 @@ const Home = () => {
   }, [])
 
   const handleSearch = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8080/api/products/search?q=${searchTerm}`)
-      setProducts(response.data)
-      setActiveCategory('All')
-      setLoading(false)
+      const response = await axios.get(`http://localhost:8080/api/products/search`, {
+        params: {
+          q: searchTerm,
+          category: activeCategory !== 'All' ? activeCategory : undefined,
+          minPrice,
+          maxPrice,
+          sortBy
+        }
+      });
+      setProducts(response.data);
+      setLoading(false);
     } catch (err) {
-      console.error('Error searching products:', err)
-      setLoading(false)
+      console.error('Error searching products:', err);
+      setLoading(false);
     }
-  }
+  };
 
   const handleCategoryFilter = async (category) => {
     setLoading(true)
@@ -109,6 +119,30 @@ const Home = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              <input
+                type="number"
+                className="form-control"
+                placeholder="Min Price"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+              />
+              <input
+                type="number"
+                className="form-control"
+                placeholder="Max Price"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+              />
+              <select
+                className="form-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="">Sort By</option>
+                <option value="price:asc">Price: Low to High</option>
+                <option value="price:desc">Price: High to Low</option>
+                <option value="date:desc">Newest First</option>
+              </select>
               <button type="submit" className="btn btn-primary">
                 <i className="bi bi-search me-1"></i> Search
               </button>

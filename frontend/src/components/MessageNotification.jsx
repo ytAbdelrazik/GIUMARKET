@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import socketService from '../services/socketService'
 import { useNavigate } from 'react-router-dom'
 
 const MessageNotification = ({ userId }) => {
@@ -8,32 +7,9 @@ const MessageNotification = ({ userId }) => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Connect to socket if not already connected
-    socketService.connect()
-    
-    // Listen for new messages
-    socketService.onMessageReceived((message) => {
-      // Only show notification for messages sent to current user
-      if (message.receiver === userId) {
-        // Show notification
-        setNotification({
-          id: message._id,
-          text: message.text,
-          sender: message.sender, // We would need to fetch sender name in a real app
-          timestamp: new Date(message.createdAt || Date.now())
-        })
-        
-        setVisible(true)
-        
-        // Hide notification after 5 seconds
-        setTimeout(() => {
-          setVisible(false)
-        }, 5000)
-      }
-    })
-    
+    // We'll handle notifications in the Chat component instead
     return () => {
-      // No need to disconnect here as the navbar is always mounted
+      // Cleanup if needed
     }
   }, [userId])
   
