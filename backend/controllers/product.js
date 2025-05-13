@@ -170,10 +170,15 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findByIdAndDelete(id);
+    const product = await Product.findById(id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    // Only allow owner or admin
+    if (String(product.seller) !== String(req.user.id) && !req.user.isAdmin) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    await product.deleteOne();
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });

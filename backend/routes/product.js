@@ -74,7 +74,7 @@ router.put("/update/:id", authMiddleware, productController.updateProduct);
 
 // DELETE REQUEST (DELETE PRODUCT)
 
-// 9) Delete a product (Admin only)
-router.delete("/delete/:id", authMiddleware, adminOnly, productController.deleteProduct);
+// 9) Delete a product (Owner or Admin)
+router.delete("/delete/:id", authMiddleware, productController.deleteProduct);
 
 module.exports = router;
