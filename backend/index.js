@@ -6,12 +6,8 @@ const socketIo = require("socket.io");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
 const adminRoutes = require("./routes/admin");
-
 const reportRoutes = require("./routes/ReportRoutes");
-const adminRoutes = require("./routes/admin");
-
 const reservationRoutes = require("./routes/reservation");
-
 const userRoutes = require("./routes/users");
 const orderRoutes = require("./routes/order");
 const messageRoutes = require("./routes/message");
@@ -36,6 +32,8 @@ const io = socketIo(server, {
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+console.log("MongoDB URI:", process.env.MONGODB_URI); // Log the MongoDB URI for debugging
 
 // Connect to MongoDB
 mongoose

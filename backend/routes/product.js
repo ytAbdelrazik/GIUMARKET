@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const productController = require("../controllers/product");
-const authMiddleware = require("../middleware/authMiddleware"); // Updated import for auth middleware
-const adminOnly = require("../middleware/adminOnly.js");
+const { authMiddleware } = require("../middleware/authMiddleware"); // Updated import for auth middleware
+const { adminOnly } = require("../middleware/adminOnly")
 const Product = require("../models/product");
 
 // GET REQUESTS (SHOW PRODUCTS AND SEARCH FUNCTION) 

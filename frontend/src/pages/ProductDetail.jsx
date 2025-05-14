@@ -215,7 +215,7 @@ const ProductDetail = ({ user }) => {
                     onClick={handleContactSeller}
                   >
                     <i className="bi bi-chat-dots me-1"></i> Contact Seller
-                  </Link>
+                  </button>
                 )}
               </div>
             </div>
