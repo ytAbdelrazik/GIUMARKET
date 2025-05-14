@@ -1,6 +1,6 @@
 const Report = require("../models/Report");
 const User = require("../models/user");
-const Message = require("../models/Message");
+const Message = require("../models/message");
 const sendEmail = require("../utils/mailer");
 // Create a new report
 // Create a new report using reporter's email instead of ID
