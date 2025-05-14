@@ -11,7 +11,6 @@ const ProductDetail = ({ user }) => {
   const [reserving, setReserving] = useState(false)
   const [reservationSuccess, setReservationSuccess] = useState(false)
   const [reservationError, setReservationError] = useState(null)
-  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchProduct = async () => {

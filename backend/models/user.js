@@ -38,6 +38,14 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 userSchema.pre("save", async function (next) {
