@@ -24,9 +24,27 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  type: {
+    type: String,
+    enum: ["student", "admin", "staff", "alumni"],
+    required: true,
+    default: "student", // Optional default type
+  },
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
   },
 });
 

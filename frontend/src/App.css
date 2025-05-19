@@ -36,3 +36,12 @@
   right: 10px;
   z-index: 1;
 }
+
+.error-message {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.admin-table td span {
+    color: #6c757d; /* Gray color for status text like 'User Banned' */
+}

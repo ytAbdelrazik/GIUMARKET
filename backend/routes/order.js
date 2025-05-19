@@ -1,7 +1,7 @@
-const express = require('express');
-const upload = require('../middleware/upload');
-const Order = require('../models/order');
-const { uploadReceipt, uploadProof, markProductAsSold } = require('../controllers/order');
+const express = require("express");
+const upload = require("../middleware/upload");
+const {authMiddleware} = require("../middleware/authMiddleware");
+const { uploadReceipt, uploadProof, markProductAsSold } = require("../controllers/order");
 
 const router = express.Router();
 
@@ -30,12 +30,10 @@ const router = express.Router();
 
 */
 
-router.post('/upload-receipt/:orderId', upload.single('receipt'), uploadReceipt);
-router.post('/upload-proof/:orderId', upload.single('proof'), uploadProof);
-router.post('/mark-sold/:orderId', markProductAsSold);
+router.post("/upload-receipt/:orderId", authMiddleware, upload.single("receipt"), uploadReceipt);
+router.post("/upload-proof/:orderId", authMiddleware, upload.single("proof"), uploadProof);
+router.post("/mark-sold/:orderId", authMiddleware, markProductAsSold);
 
-
-
-//////
+//////x
 
 module.exports = router;

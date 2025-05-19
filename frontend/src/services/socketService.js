@@ -1,5 +1,4 @@
 import { io } from "socket.io-client";
-import { chatService } from "./api";
 
 class SocketService {
   constructor() {
@@ -11,17 +10,36 @@ class SocketService {
   }
 
   // Initialize socket connection
-  connect() {
+  connect(userId) {
+    if (!userId) {
+      console.error("UserId is required for socket connection");
+      return null;
+    }
+
     if (!this.socket) {
+      console.log("Initializing socket connection for user:", userId);
       this.socket = io("http://localhost:8080", {
         reconnectionAttempts: this.maxReconnectAttempts,
         timeout: 10000,
+        auth: { userId }, // Add authentication data to initial connection
       });
 
       this.socket.on("connect", () => {
         console.log("Connected to WebSocket server");
         this.isConnected = true;
         this.reconnectAttempts = 0;
+
+        // Authenticate the user with detailed logging
+        console.log("Emitting authenticate event with userId:", userId);
+        this.socket.emit("authenticate", { id: userId });
+
+        this.socket.on("authenticate_success", () => {
+          console.log("Authentication successful for user:", userId);
+        });
+
+        this.socket.on("authenticate_error", (error) => {
+          console.error("Authentication error:", error);
+        });
 
         // Notify any listeners that we're connected
         if (this.callbacks.onConnect) {
@@ -76,48 +94,34 @@ class SocketService {
   }
 
   // Join a chat room
-  joinChat(user1, user2, productId) {
-    if (this.socket) {
-      console.log(`Joining chat room for users ${user1}, ${user2} and product ${productId}`);
-      this.socket.emit("joinChat", { user1, user2, productId });
+  joinChat(user1, user2) {
+    if (this.socket && this.isConnected) {
+      console.log(`Joining chat room for users ${user1} and ${user2}`);
+      this.socket.emit("joinChat", { user1, user2 });
     } else {
-      console.error("Socket not connected, attempting to connect");
-      this.connect();
-      setTimeout(() => this.joinChat(user1, user2, productId), 500);
+      console.error("Socket not connected");
     }
   }
 
   // Send a message
-  sendMessage(sender, receiver, text, productId) {
+  sendMessage(sender, receiver, text) {
     if (this.socket && this.isConnected) {
-      console.log(`Sending message from ${sender} to ${receiver} about product ${productId}`);
+      console.log(`Sending message from ${sender} to ${receiver}`);
       this.socket.emit("sendMessage", {
         sender,
         receiver,
         text,
-        productId,
       });
       return true;
     } else {
-      console.log("Socket not connected, using HTTP fallback");
-      // Use HTTP fallback to ensure persistence
-      chatService
-        .sendMessage(sender, receiver, text, productId)
-        .then((message) => {
-          if (this.callbacks.onMessageReceived) {
-            this.callbacks.onMessageReceived(message);
-          }
-        })
-        .catch((error) => {
-          console.error("Failed to send message via HTTP fallback:", error);
-        });
+      console.error("Socket not connected");
       return false;
     }
   }
 
   // Mark a message as read
   markAsRead(messageId) {
-    if (this.socket && messageId) {
+    if (this.socket && this.isConnected) {
       this.socket.emit("markAsRead", { messageId });
     }
   }
@@ -137,6 +141,20 @@ class SocketService {
 
   onMessageReceived(callback) {
     this.callbacks.onMessageReceived = callback;
+  }
+
+  // Create a new message via socket
+  createMessage(conversationId, text, productId) {
+    if (this.socket && this.isConnected) {
+      this.socket.emit("createMessage", { conversationId, text, productId });
+    }
+  }
+
+  // Listen for new messages
+  onNewMessage(callback) {
+    if (this.socket) {
+      this.socket.on("newMessage", callback);
+    }
   }
 }
 

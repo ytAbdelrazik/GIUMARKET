@@ -12,22 +12,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// Get user by ID
-const getUserById = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select("-password"); // Exclude password
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json(user);
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
 // Update user profile
 const updateUserProfile = async (req, res) => {
   try {
@@ -57,8 +41,44 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+// Search users by name or email (Admin only)
+const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q) {
+      // If no query, return all users (similar to getAllUsers but might have different access control)
+      const users = await User.find().select("-password");
+      return res.json(users);
+    }
+
+    // Search by name or email, case-insensitive
+    const users = await User.find({
+      $or: [{ name: { $regex: q, $options: "i" } }, { email: { $regex: q, $options: "i" } }],
+    }).select("-password");
+
+    res.json(users);
+  } catch (err) {
+    console.error("Error searching users:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get user by ID
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   getAllUsers,
-  getUserById,
   updateUserProfile,
+  getUserById,
+  searchUsers, // Export the new function
 };

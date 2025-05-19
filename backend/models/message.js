@@ -22,6 +22,11 @@ const messageSchema = new mongoose.Schema(
       ref: "Product",
       required: true,
     },
+    conversationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Conversation",
+      required: true,
+    },
     read: {
       type: Boolean,
       default: false,
