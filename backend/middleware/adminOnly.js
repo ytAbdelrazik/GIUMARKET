@@ -30,4 +30,4 @@ const adminOnly = async (req, res, next) => {
   }
 };
 
-module.exports = adminOnly;
+module.exports = { adminOnly };

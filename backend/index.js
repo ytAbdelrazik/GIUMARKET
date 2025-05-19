@@ -5,11 +5,9 @@ const http = require("http");
 const socketIo = require("socket.io");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
-const reportRoutes = require("./routes/ReportRoutes");
 const adminRoutes = require("./routes/admin");
-
+const reportRoutes = require("./routes/ReportRoutes");
 const reservationRoutes = require("./routes/reservation");
-
 const userRoutes = require("./routes/users");
 const orderRoutes = require("./routes/order");
 const messageRoutes = require("./routes/message");
@@ -35,6 +33,8 @@ const io = socketIo(server, {
 app.use(express.json());
 app.use(cors());
 
+console.log("MongoDB URI:", process.env.MONGODB_URI); // Log the MongoDB URI for debugging
+
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -51,7 +51,6 @@ app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 
 app.use("/api/reservations", reservationRoutes);
-
 app.use("/api/orders", orderRoutes);
 
 app.use("/api/admin", adminRoutes);
