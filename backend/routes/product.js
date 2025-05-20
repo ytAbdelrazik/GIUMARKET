@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require("../controllers/product");
-const { authMiddleware } = require("../middleware/authMiddleware"); // Updated import for auth middleware
+const authMiddleware  = require("../middleware/authMiddleware"); // Updated import for auth middleware
 const { adminOnly } = require("../middleware/adminOnly")
 const Product = require("../models/product");
 const adminMiddleware = require('../middleware/adminMiddleware');
@@ -9,7 +9,7 @@ const adminMiddleware = require('../middleware/adminMiddleware');
 // GET REQUESTS (SHOW PRODUCTS AND SEARCH FUNCTION) 
 
 // 1) Get all Products (Admin only)
-router.get("/all", authMiddleware, adminOnly, productController.getAllProducts);
+router.get("/all", authMiddleware, adminMiddleware, productController.getAllProducts);
 
 // 2) Get all available Products
 //Tested-Working

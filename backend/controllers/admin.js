@@ -136,5 +136,8 @@ const getAdminAnalytics = async (req, res) => {
 };
 
 module.exports = {
+  approveListing,
+  handleDispute,
+  getAdminAnalytics,
   banUser,
 };

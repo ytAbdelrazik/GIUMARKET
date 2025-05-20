@@ -13,6 +13,8 @@ const Chat = ({ user }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentConversation, setCurrentConversation] = useState(null);
+  const [reservations, setReservations] = useState([]);
+  const [currentReservation, setCurrentReservation] = useState(null);
 
   useEffect(() => {
     if (!user || !user.id) {
@@ -72,16 +74,53 @@ const Chat = ({ user }) => {
       }
     };
 
+    const fetchReservations = async () => {
+      if (!user?.id) return;
+      
+      try {
+        // Determine if the current user is the seller of the product in the conversation
+        const isSeller = currentConversation?.productId?.seller === user.id;
+        console.log(isSeller)
+        
+        // Use the appropriate endpoint based on user role
+        const endpoint = isSeller ? 'seller' : 'buyer';
+        const response = await axios.get(`${API_BASE_URL}/reservations/${endpoint}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log(response.data)
+        setReservations(response.data);
+        
+        // If we have a current conversation, find the related reservation
+        if (currentConversation?.productId?._id) {
+          const reservation = response.data.find(res => 
+            res.product._id === currentConversation.productId._id &&
+            (isSeller ? res.buyer._id === receiverId : res.seller._id === receiverId) &&
+            res.status === 'pending'
+          );
+          setCurrentReservation(reservation);
+        }
+      } catch (error) {
+        console.error('Error fetching reservations:', error);
+        if (error.response?.data?.message) {
+          setError(error.response.data.message);
+        }
+      }
+    };
+
     // Initial fetch
     fetchConversations();
     
     // Set up polling intervals
     const conversationsInterval = setInterval(fetchConversations, 5000);
     const messagesInterval = setInterval(fetchMessages, 3000);
+    const reservationsInterval = setInterval(fetchReservations, 5000);
+
+    fetchReservations();
 
     return () => {
       clearInterval(conversationsInterval);
       clearInterval(messagesInterval);
+      clearInterval(reservationsInterval);
     };
   }, [user, receiverId, navigate, currentConversation?._id]);
 
@@ -125,6 +164,49 @@ const Chat = ({ user }) => {
         setError(error.response.data.error);
       } else {
         setError('Failed to send message');
+      }
+    }
+  };
+
+  const handleAcceptReservation = async () => {
+    if (!currentReservation?._id) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/reservations/accept/${currentReservation._id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
+      // Update the reservation in state
+      setReservations(prevReservations => 
+        prevReservations.map(res => 
+          res._id === currentReservation._id ? response.data : res
+        )
+      );
+      setCurrentReservation(response.data);
+      
+      // Send a system message about the accepted reservation
+      await handleSendMessage({
+        preventDefault: () => {},
+        target: {
+          value: `Reservation request has been accepted! The product is now reserved for you.`
+        }
+      });
+    } catch (error) {
+      console.error('Error accepting reservation:', error);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError('Failed to accept reservation');
       }
     }
   };
@@ -185,6 +267,35 @@ const Chat = ({ user }) => {
         <div className="col-md-8">
           {receiverId ? (
             <>
+              {currentConversation?.productId?.seller === user.id && (
+                <div className="alert alert-info mb-3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span>
+                      {currentReservation?.status === 'pending' 
+                        ? `Pending reservation request for ${currentConversation.productId.title}`
+                        : `No pending reservation for ${currentConversation.productId.title}`
+                      }
+                    </span>
+                    <button 
+                      className={`btn ${currentReservation?.status === 'pending' ? 'btn-success' : 'btn-secondary'} btn-sm`}
+                      onClick={handleAcceptReservation}
+                      disabled={!currentReservation || currentReservation.status !== 'pending'}
+                      title={!currentReservation 
+                        ? "No reservation request available" 
+                        : currentReservation.status !== 'pending' 
+                          ? "This reservation is no longer pending"
+                          : "Accept this reservation request"
+                      }
+                      style={{ cursor: !currentReservation || currentReservation.status !== 'pending' ? 'not-allowed' : 'pointer' }}
+                    >
+                      {currentReservation?.status === 'pending' 
+                        ? 'Accept Reservation'
+                        : 'No Pending Reservation'
+                      }
+                    </button>
+                  </div>
+                </div>
+              )}
               <div
                 className="chat-messages border rounded p-3 mb-3"
                 style={{ height: '400px', overflowY: 'auto' }}
