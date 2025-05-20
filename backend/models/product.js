@@ -75,10 +75,6 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    flags: {
-      type: Number,
-      default: 0,
-    },
     isFlagged: {
       type: Boolean,
       default: false,

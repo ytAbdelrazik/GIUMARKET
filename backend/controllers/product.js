@@ -180,7 +180,7 @@ const flagProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    product.flags += 1;
+    product.isFlagged = true;
     await product.save();
 
     res.json({ message: "Product flagged successfully", product });

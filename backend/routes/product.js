@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/product');
 const authMiddleware = require('../middleware/authMiddleware');
+const adminMiddleware = require('../middleware/adminMiddleware');
 
 // GET REQUESTS (SHOW PRODUCTS AND SEARCH FUNCTION) 
 
@@ -47,6 +48,6 @@ router.put("/update/:id", productController.updateProduct);
 router.delete("/delete/:id", productController.deleteProduct);
 
 
-router.put("/flag/:id",authMiddleware.authMiddleware, authMiddleware.adminMiddleware, productController.flagProduct);
+router.put("/flag/:id", authMiddleware, adminMiddleware, productController.flagProduct);
 
 module.exports = router;
