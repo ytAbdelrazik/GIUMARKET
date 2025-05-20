@@ -1,5 +1,6 @@
 const express = require("express");
 const usersController = require("../controllers/users");
+const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const {adminOnly} = require("../middleware/adminOnly.js");
@@ -21,7 +22,12 @@ router.get("/:id", usersController.getUserById);
 
 // @route   PUT /api/users/:id
 // @desc    Update user profile
-// @access  Public (or Authenticated? Check usage)
-router.put("/:id", usersController.updateUserProfile);
+// @access  Private
+router.put("/:id", authMiddleware, usersController.updateUserProfile);
+
+// @route   DELETE /api/users/delete
+// @desc    Delete user account
+// @access  Private
+router.delete('/delete', authMiddleware, usersController.deleteUser)
 
 module.exports = router;

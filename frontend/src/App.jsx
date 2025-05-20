@@ -9,6 +9,7 @@ import Signup from './pages/Signup'
 import Chat from './pages/Chat'
 import AdminDashboard from './pages/AdminDashboard'
 import ProductDetail from './pages/ProductDetail'
+import Profile from './pages/Profile'
 
 // Components
 import Navbar from './components/Navbar'
@@ -90,6 +91,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Chat user={user} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                <Profile user={user} setUser={setUser} />
                 </ProtectedRoute>
               } 
             />

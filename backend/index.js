@@ -58,6 +58,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/conversations", conversationRoutes);
+console.log("MONGODB_URI:", process.env.MONGODB_URI);
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
