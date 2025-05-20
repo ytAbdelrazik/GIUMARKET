@@ -6,16 +6,12 @@ const socketIo = require("socket.io");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/product");
 const adminRoutes = require("./routes/admin");
-
 const reportRoutes = require("./routes/ReportRoutes");
-
 const reservationRoutes = require("./routes/reservation");
-
-
 const userRoutes = require("./routes/users");
-const chatRoutes = require("./routes/chat"); // We'll create this
 const orderRoutes = require("./routes/order");
-
+const messageRoutes = require("./routes/message");
+const conversationRoutes = require("./routes/conversation");
 
 const cors = require("cors");
 const { setupSocketIO } = require("./socket"); // We'll create this
@@ -37,6 +33,8 @@ const io = socketIo(server, {
 app.use(express.json());
 app.use(cors());
 
+console.log("MongoDB URI:", process.env.MONGODB_URI); // Log the MongoDB URI for debugging
+
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -49,13 +47,17 @@ setupSocketIO(io);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/users", userRoutes)
+
+app.use("/api/users", userRoutes);
+
 app.use("/api/reservations", reservationRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/chat", chatRoutes);
-app.use("/api/reports", reportRoutes);
 
+app.use("/api/admin", adminRoutes);
+
+app.use("/api/reports", reportRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/conversations", conversationRoutes);
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {

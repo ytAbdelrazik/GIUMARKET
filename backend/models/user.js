@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: "student", // Optional default type
   },
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

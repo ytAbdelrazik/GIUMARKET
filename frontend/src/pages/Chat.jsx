@@ -1,106 +1,264 @@
-import { useState, useEffect } from 'react'
-import ChatSidebar from '../components/ChatSidebar'
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:8080/api';
 
 const Chat = ({ user }) => {
-  const [selectedChat, setSelectedChat] = useState(null)
-  const [messages, setMessages] = useState([])
-  const [newMessage, setNewMessage] = useState('')
-  
-  useEffect(() => {
-    // Here you would fetch messages when a chat is selected
-    if (selectedChat) {
-      // Fetch messages for the selected chat
-      // This is a placeholder as the backend doesn't have chat functionality yet
-      setMessages([
-        { id: 1, sender: 'other-user', content: 'Hello, I am interested in your product', timestamp: new Date() },
-        { id: 2, sender: user.id, content: 'Great! When would you like to meet?', timestamp: new Date() }
-      ])
-    }
-  }, [selectedChat, user])
+  const { receiverId } = useParams();
+  const navigate = useNavigate();
+  const [conversations, setConversations] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentConversation, setCurrentConversation] = useState(null);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault()
-    if (!newMessage.trim()) return
-    
-    // Here you would send the message to the backend
-    // For now, just add it to the local state
-    const message = {
-      id: Date.now(),
-      sender: user.id,
-      content: newMessage,
-      timestamp: new Date()
+  useEffect(() => {
+    if (!user || !user.id) {
+      navigate('/login');
+      return;
     }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    const fetchConversations = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/conversations`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setConversations(response.data);
+        
+        // If we have a receiverId, find the current conversation
+        if (receiverId) {
+          const conversation = response.data.find(conv => 
+            conv.participants.some(p => p._id === receiverId)
+          );
+          setCurrentConversation(conversation);
+        }
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+        setError('Failed to load conversations');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchMessages = async () => {
+      if (!currentConversation?._id) return;
+      
+      try {
+        const response = await axios.get(`${API_BASE_URL}/messages/${currentConversation._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Sort messages by createdAt timestamp
+        const sortedMessages = response.data.sort((a, b) => 
+          new Date(a.createdAt) - new Date(b.createdAt)
+        );
+        
+        setMessages(sortedMessages);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        if (error.response?.status === 404) {
+          setMessages([]);
+        } else {
+          setError('Failed to load messages');
+        }
+      }
+    };
+
+    // Initial fetch
+    fetchConversations();
     
-    setMessages([...messages, message])
-    setNewMessage('')
+    // Set up polling intervals
+    const conversationsInterval = setInterval(fetchConversations, 5000);
+    const messagesInterval = setInterval(fetchMessages, 3000);
+
+    return () => {
+      clearInterval(conversationsInterval);
+      clearInterval(messagesInterval);
+    };
+  }, [user, receiverId, navigate, currentConversation?._id]);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !receiverId || !currentConversation) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    if (!currentConversation.productId?._id) {
+      setError('Product information not found');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/messages`,
+        {
+          text: newMessage.trim(),
+          receiverId,
+          productId: currentConversation.productId._id
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      // Add the new message to the state and sort
+      setMessages(prevMessages => {
+        const newMessages = [...prevMessages, response.data];
+        return newMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      });
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      if (error.response?.data?.error) {
+        setError(error.response.data.error);
+      } else {
+        setError('Failed to send message');
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mt-4">
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-2">Loading conversations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mt-4">
+        <div className="alert alert-danger">{error}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="container-fluid px-0">
-      <div className="row g-0" style={{ height: 'calc(100vh - 70px)' }}>
-        <div className="col-md-4 col-lg-3 border-end">
-          <ChatSidebar 
-            selectedChat={selectedChat}
-            setSelectedChat={setSelectedChat}
-            userId={user.id}
-          />
-        </div>
-        
-        <div className="col-md-8 col-lg-9 d-flex flex-column">
-          {!selectedChat ? (
-            <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center p-4">
-              <div className="mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" className="bi bi-chat-text text-muted" viewBox="0 0 16 16">
-                  <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
-                  <path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8zm0 2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
-                </svg>
-              </div>
-              <p className="text-muted">Select a conversation to start chatting</p>
-            </div>
-          ) : (
-            <>
-              <div className="chat-header p-3 border-bottom bg-light">
-                <h5 className="mb-0">{selectedChat.name}</h5>
-              </div>
-              
-              <div className="messages-container flex-grow-1 p-3 overflow-auto bg-light" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-                {messages.map(message => {
-                  const isSentByMe = message.sender === user.id;
-                  return (
-                    <div 
-                      key={message.id} 
-                      className={`d-flex mb-3 ${isSentByMe ? 'justify-content-end' : 'justify-content-start'}`}
-                    >
-                      <div className={`message p-3 rounded-3 ${isSentByMe ? 'bg-primary text-white' : 'bg-white border'}`}
-                           style={{ maxWidth: '75%' }}>
-                        <p className="mb-0">{message.content}</p>
-                        <small className={`d-block mt-1 ${isSentByMe ? 'text-white-50' : 'text-muted'}`}>
-                          {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </small>
-                      </div>
+    <div className="container mt-4">
+      <div className="row">
+        <div className="col-md-4">
+          <h4>Conversations</h4>
+          <div className="list-group">
+            {conversations.length === 0 ? (
+              <div className="text-muted p-3">No conversations yet</div>
+            ) : (
+              conversations.map((conv) => (
+                <Link
+                  key={conv._id}
+                  to={`/chat/${conv.participants.find((p) => p._id !== user.id)?._id}`}
+                  className={`list-group-item list-group-item-action ${
+                    conv.participants.find((p) => p._id === receiverId) ? 'active' : ''
+                  }`}
+                >
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      {conv.participants.find((p) => p._id !== user.id)?.name || 'Unknown User'}
                     </div>
-                  );
-                })}
+                    {conv.productId && (
+                      <small className="text-muted">
+                        {conv.productId.title} - ${conv.productId.price}
+                      </small>
+                    )}
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+        <div className="col-md-8">
+          {receiverId ? (
+            <>
+              <div
+                className="chat-messages border rounded p-3 mb-3"
+                style={{ height: '400px', overflowY: 'auto' }}
+              >
+                {messages.length === 0 ? (
+                  <div className="text-center text-muted">
+                    <p>No messages yet</p>
+                    <p>Start the conversation by sending a message!</p>
+                  </div>
+                ) : (
+                  messages.map((message) => {
+                    const senderId = typeof message.sender === 'object' && message.sender !== null
+                      ? message.sender._id
+                      : message.sender;
+                    const isCurrentUser = String(senderId) === String(user.id);
+                    return (
+                      <div
+                        key={message._id}
+                        className={`message-container d-flex ${
+                          isCurrentUser ? 'justify-content-end' : 'justify-content-start'
+                        } mb-2`}
+                      >
+                        <div
+                          className={`message p-3 rounded-3 ${
+                            isCurrentUser 
+                              ? 'bg-primary text-white' 
+                              : 'bg-light text-dark'
+                          }`}
+                          style={{
+                            maxWidth: '70%',
+                            wordBreak: 'break-word',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                          }}
+                        >
+                          <div className="message-text">{message.text}</div>
+                          <div 
+                            className={`message-time small ${
+                              isCurrentUser ? 'text-white-50' : 'text-muted'
+                            }`}
+                            style={{ fontSize: '0.75rem', marginTop: '4px' }}
+                          >
+                            {new Date(message.createdAt).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
-              
-              <form className="message-form p-3 border-top" onSubmit={handleSendMessage}>
-                <div className="input-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                  />
-                  <button type="submit" className="btn btn-primary">Send</button>
-                </div>
+              <form onSubmit={handleSendMessage} className="input-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Type a message..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                />
+                <button type="submit" className="btn btn-primary">
+                  Send
+                </button>
               </form>
             </>
+          ) : (
+            <div className="text-center mt-5">
+              <h5>Select a conversation to start chatting</h5>
+            </div>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Chat
+export default Chat;

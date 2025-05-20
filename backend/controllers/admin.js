@@ -26,16 +26,19 @@ const approveListing = async (req, res) => {
 // Ban a user
 const banUser = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const user = await User.findById(userId);
+    const { id } = req.params; // Correctly get id from req.params
+
+    // Find user by ID
+    const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      console.log("User not found with ID:", id);
+      return res.status(404).json({ message: "User not found" }); // Use 404 for not found
     }
 
-    //cannot ban admin
-    if (user.isAdmin) {
-      return res.status(403).json({ message: "Cannot ban an admin user" });
+    // Prevent banning oneself (optional but good practice)
+    if (req.user.id === id) {
+      return res.status(400).json({ message: "Cannot ban yourself" });
     }
 
     user.isBanned = true;
@@ -133,8 +136,5 @@ const getAdminAnalytics = async (req, res) => {
 };
 
 module.exports = {
-  approveListing,
   banUser,
-  handleDispute,
-  getAdminAnalytics,
 };
