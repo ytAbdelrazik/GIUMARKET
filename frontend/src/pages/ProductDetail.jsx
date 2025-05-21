@@ -66,7 +66,7 @@ const ProductDetail = ({ user }) => {
       return
     }
 
-    navigate(`/chat/${sellerId}`)
+    navigate(`/chat/${sellerId}`, { state: { productId: product._id } })
   }
 
   const handleProductUpdate = (updatedProduct) => {

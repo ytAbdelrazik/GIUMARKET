@@ -12,16 +12,16 @@ const createMessage = async (req, res) => {
       });
     }
 
-    // Find or create conversation
+    // First try to find any existing conversation between these users
     let conversation = await Conversation.findOne({
-      participants: { $all: [req.user.id, receiverId] },
-      productId: productId
+      participants: { $all: [req.user.id, receiverId] }
     });
 
+    // If no conversation exists, create a new one
     if (!conversation) {
       conversation = new Conversation({
         participants: [req.user.id, receiverId],
-        productId: productId
+        productId: productId // Store the current product ID, but don't use it for finding conversations
       });
       await conversation.save();
     }
@@ -30,7 +30,7 @@ const createMessage = async (req, res) => {
       conversationId: conversation._id,
       sender: req.user.id,
       text,
-      productId: conversation.productId,
+      productId: productId, // Store the current product ID with the message
       room: conversation._id.toString()
     });
 

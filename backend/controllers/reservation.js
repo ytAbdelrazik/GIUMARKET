@@ -1,14 +1,16 @@
 const Reservation = require("../models/reservation");
 const Product = require("../models/product");
+const Message = require("../models/message");
+const Conversation = require("../models/conversation");
 
 // Create a new reservation request
 const createReservation = async (req, res) => {
   try {
     const { productId } = req.params;
-    const buyerId = req.user.id; // Get the ID from the user object
+    const buyerId = req.user.id;
 
     // Find the product
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate('seller');
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -33,12 +35,40 @@ const createReservation = async (req, res) => {
     const reservation = new Reservation({
       product: productId,
       buyer: buyerId,
-      seller: product.seller,
+      seller: product.seller._id,
     });
 
     await reservation.save();
 
-    res.status(201).json(reservation);
+    // Find any existing conversation between buyer and seller
+    let conversation = await Conversation.findOne({
+      participants: { $all: [buyerId, product.seller._id] }
+    });
+
+    // If no conversation exists, create a new one
+    if (!conversation) {
+      conversation = new Conversation({
+        participants: [buyerId, product.seller._id],
+        productId: productId // Store the current product ID, but don't use it for finding conversations
+      });
+      await conversation.save();
+    }
+
+    // Create automated message about the reservation
+    const message = new Message({
+      conversationId: conversation._id,
+      sender: buyerId,
+      text: `I would like to reserve "${product.name}" for ${product.price}. Please review my reservation request.`,
+      productId: productId, // Store the current product ID with the message
+      room: conversation._id.toString()
+    });
+
+    await message.save();
+
+    res.status(201).json({
+      reservation,
+      message: "Reservation request created and notification sent to seller"
+    });
   } catch (error) {
     console.error("Create reservation error:", error);
     res.status(500).json({ message: "Server error" });
