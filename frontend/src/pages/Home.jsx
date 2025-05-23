@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+// Added Code
+import { productApi } from '../services/api'
+import MyProducts from '../components/MyProducts'
+import AddProductForm from '../components/AddProductForm'
 
 const Home = () => {
   const [products, setProducts] = useState([])
@@ -13,6 +17,13 @@ const Home = () => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortBy, setSortBy] = useState('');
+
+// ADDED CODE
+  const [showMyProducts, setShowMyProducts] = useState(false);
+  const [myProducts, setMyProducts] = useState([]);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [addProductError, setAddProductError] = useState(null);
+  const [addProductLoading, setAddProductLoading] = useState(false);
 
   const isLoggedIn = localStorage.getItem('user') ? true : false
 
@@ -66,9 +77,12 @@ const Home = () => {
     }
   };
 
+  // PER CATEFORY FILTER
   const handleCategoryFilter = async (category) => {
     setLoading(true)
     setActiveCategory(category)
+    setShowMyProducts(false);
+    setShowAddProduct(false);
     
     try {
       let response
@@ -84,6 +98,31 @@ const Home = () => {
       setLoading(false)
     }
   }
+
+  // ADDED CODE (HANDLERS FOR SHOWING MY PRODUCTS AND ADDING A PRODUCT)
+
+  // MY PRODUCTS FILTER 
+  const handleShowMyProducts = async () => {
+  setShowMyProducts(true);
+  setShowAddProduct(false);
+  setLoading(true);
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const response = await productApi.getProductsBySeller(user.id);
+    setMyProducts(response.data);
+    setLoading(false);
+  } catch (err) {
+    setError('Failed to load your products');
+    setLoading(false);
+  }
+};
+
+  // ADD PRODUCT FILTER
+  const handleShowAddProduct = () => {
+  setShowAddProduct(true);
+  setShowMyProducts(false);
+  setAddProductError(null);
+};
 
   if (loading && products.length === 0) return (
     <div className="container mt-5 text-center">
@@ -111,7 +150,7 @@ const Home = () => {
           <p className="lead mb-4">Buy and sell items within the GIU community. Find textbooks, electronics, and more!</p>
           
           <form onSubmit={handleSearch} className="d-flex justify-content-center mb-4">
-            <div className="input-group" style={{ maxWidth: '600px' }}>
+            <div className="input-group" style={{ maxWidth: '1200px', width: '100%' }}>
               <input
                 type="text"
                 className="form-control form-control-lg"
@@ -150,13 +189,8 @@ const Home = () => {
           </form>
           
           <div className="mt-4">
-            {localStorage.getItem('token') ? (
+            {isLoggedIn && (
               <p className="text-light">Welcome back!</p>
-            ) : (
-              <>
-                <Link to="/signup" className="btn btn-outline-light btn-lg me-2">Sign Up</Link>
-                <Link to="/login" className="btn btn-light btn-lg">Login</Link>
-              </>
             )}
           </div>
         </div>
@@ -172,7 +206,7 @@ const Home = () => {
                 <div className="card h-100 shadow-sm">
                   {product.images && product.images.length > 0 ? (
                     <img 
-                      src={product.images[0]} 
+                      src={`http://localhost:8080/${product.images[0]}`} 
                       className="card-img-top card-image-top" 
                       alt={product.name} 
                     />
@@ -219,16 +253,47 @@ const Home = () => {
             {categories.map(category => (
               <button 
                 key={category}
-                className={`btn ${activeCategory === category ? 'btn-primary' : 'btn-outline-primary'} me-2 mb-2`}
-                onClick={() => handleCategoryFilter(category)}
+                className={`btn ${activeCategory === category && !showMyProducts && !showAddProduct ? 'btn-primary' : 'btn-outline-primary'} me-2 mb-2`}
+                onClick={() => {handleCategoryFilter(category)}}
               >
                 {category}
               </button>
             ))}
+            {/* MY PRODUCTS AND CREATE PRODUCT BUTTON */}
+                {isLoggedIn && (
+                    <>
+                      <button
+                        className={`btn ${showMyProducts && !showAddProduct? 'btn-primary' : 'btn-outline-primary'} me-2 mb-2`}
+                        onClick={handleShowMyProducts}
+                      >
+                        My Products
+                      </button>
+                      <button
+                        className={`btn ${showAddProduct && !showMyProducts ? 'btn-primary' : 'btn-outline-primary'} me-2 mb-2`}
+                        onClick={handleShowAddProduct}
+                      >
+                        Add Product
+                      </button>
+                    </>
+            )}
           </div>
         </div>
-        
-        {loading ? (
+        {/* SHOW CREATE/MY PRODUCTS COMPONENTS BASED ON STATE */}
+        {showMyProducts && (
+      <MyProducts products={myProducts} loading={loading} />
+        )}
+
+        {showAddProduct && (
+          <AddProductForm
+            categories={categories}
+            onSuccess={() => {
+              setShowAddProduct(false);
+              handleShowMyProducts(); // Refresh my products after adding
+            }}
+          />
+        )}
+      {!showMyProducts && !showAddProduct && (
+        loading ? (
           <div className="text-center my-5">
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading products...</span>
@@ -251,7 +316,7 @@ const Home = () => {
                 <div className="card h-100 shadow-sm">
                   {product.images && product.images.length > 0 ? (
                     <img 
-                      src={product.images[0]} 
+                      src={`http://localhost:8080/${product.images[0]}`} 
                       className="card-img-top card-image-top" 
                       alt={product.name} 
                     />
@@ -285,7 +350,7 @@ const Home = () => {
               </div>
             ))}
           </div>
-        )}
+        ))}
       </section>
       
       {/* How It Works Section */}

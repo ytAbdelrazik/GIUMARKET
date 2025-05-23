@@ -38,7 +38,10 @@ const storage = multer.diskStorage({
             uploadPath += "receipts/";
         } else if (file.fieldname === "proof") {
             uploadPath += "proofs/";
+        } else if (file.fieldname === "productImage") { // ADDED PRODUCT IMAGE UPLOAD FUNCTIONALITY
+          uploadPath += "products/";
         }
+
 
         // Ensure folder exists
         createFolderIfNotExists(uploadPath);

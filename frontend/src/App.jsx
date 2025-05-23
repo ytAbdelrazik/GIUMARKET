@@ -10,6 +10,7 @@ import Chat from './pages/Chat'
 import AdminDashboard from './pages/AdminDashboard'
 import ProductDetail from './pages/ProductDetail'
 import Profile from './pages/Profile'
+import Reservations from './pages/Reservations'
 
 // Components
 import Navbar from './components/Navbar'
@@ -103,6 +104,14 @@ function App() {
               } 
             />
             <Route path="*" element={<Navigate to="/" />} />
+            <Route 
+              path="/reservations" 
+              element={
+                <ProtectedRoute>
+                  <Reservations user={user} />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </div>
       </div>

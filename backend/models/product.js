@@ -34,11 +34,11 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
 
-    quantity: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
+    // quantity: {
+    //   type: Number,
+    //   required: true,
+    //   min: 0,
+    // },
 
     condition: {
       type: String,
@@ -48,9 +48,7 @@ const productSchema = new mongoose.Schema(
 
     availability: {
       type: Boolean,
-      default: function () {
-        return this.quantity > 0;
-      },
+      default: true
     },
 
     // IMAGES:
@@ -65,7 +63,7 @@ const productSchema = new mongoose.Schema(
     //we will store a filepath to the image according to our local file structure
     //for example we will have a folder called images and image1.jpg image2.jpg will be uploaded
     //to this folder from the server, and it will fetch the images based on the filepath stored
-
+    
     images: {
       type: [String],
       default: [],
@@ -86,9 +84,9 @@ const productSchema = new mongoose.Schema(
 // HOOKS:
 
 // Pre - Validate Hook to ensure that the availabilty is updated when the quanity changes
-productSchema.pre("validate", function (next) {
-  this.availability = this.quantity > 0;
-  next();
-});
+// productSchema.pre("validate", function (next) {
+//   this.availability = this.quantity > 0;
+//   next();
+// });
 
 module.exports = mongoose.model("Product", productSchema);

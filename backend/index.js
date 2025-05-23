@@ -12,6 +12,7 @@ const userRoutes = require("./routes/users");
 const orderRoutes = require("./routes/order");
 const messageRoutes = require("./routes/message");
 const conversationRoutes = require("./routes/conversation");
+const path = require("path");
 
 const cors = require("cors");
 const { setupSocketIO } = require("./socket"); // We'll create this
@@ -58,6 +59,10 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/conversations", conversationRoutes);
+
+// STATIC IMAGE
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 console.log("MONGODB_URI:", process.env.MONGODB_URI);
 
 const PORT = process.env.PORT || 8080;

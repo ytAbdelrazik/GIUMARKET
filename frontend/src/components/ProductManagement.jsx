@@ -113,9 +113,9 @@ const ProductManagement = ({ product, onUpdate, onDelete }) => {
                 required
               >
                 <option value="">Select a category</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Books">Books</option>
-                <option value="Clothing">Clothing</option>
+                <option value="Study Materials">Study Materials</option>
+                <option value="Project Supplies">Project Supplies</option>
+                <option value="Accessories">Accessories</option>
                 <option value="Other">Other</option>
               </select>
             </div>

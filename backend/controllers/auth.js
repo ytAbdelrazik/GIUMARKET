@@ -70,8 +70,12 @@ const login = async (req, res) => {
     console.log("Password matched, generating token");
     // Generate token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-
+    
     console.log("Token generated, sending response");
+
+    // FOR TESTING
+    console.log(token);
+
     res.json({
       token,
       user: {

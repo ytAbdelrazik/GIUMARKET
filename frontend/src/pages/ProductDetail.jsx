@@ -13,6 +13,10 @@ const ProductDetail = ({ user }) => {
   const [reservationSuccess, setReservationSuccess] = useState(false)
   const [reservationError, setReservationError] = useState(null)
 
+  // IMAGES
+  const [currentImage, setCurrentImage] = useState(0);
+
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -105,6 +109,19 @@ const ProductDetail = ({ user }) => {
     (product.seller === user.id)
   )
 
+  // IMAGE HANDLERS
+  const handlePrevImage = () => {
+  setCurrentImage((prev) =>
+    prev === 0 ? product.images.length - 1 : prev - 1
+  );
+};
+
+const handleNextImage = () => {
+  setCurrentImage((prev) =>
+    prev === product.images.length - 1 ? 0 : prev + 1
+  );
+};
+
   return (
     <div className="container mt-5">
       <nav aria-label="breadcrumb">
@@ -117,36 +134,95 @@ const ProductDetail = ({ user }) => {
 
       <div className="row mt-4">
         <div className="col-md-5">
-          {product.images && product.images.length > 0 ? (
-            <img 
-              src={product.images[0]} 
-              className="img-fluid rounded shadow" 
-              alt={product.name} 
-            />
-          ) : (
-            <div 
-              className="bg-light d-flex align-items-center justify-content-center border rounded"
-              style={{height: "350px"}}
+  <div className="position-relative" style={{ height: 350, background: "#fafbfc", borderRadius: 12, overflow: "hidden" }}>
+    {product.images && product.images.length > 0 ? (
+      <>
+        <img
+          src={`http://localhost:8080/${product.images[currentImage]}`}
+          alt={product.name}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            background: "#fafbfc",
+          }}
+        />
+        {product.images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={handlePrevImage}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: 10,
+                transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.8)",
+                border: "none",
+                borderRadius: "50%",
+                width: 36,
+                height: 36,
+                fontSize: 22,
+                fontWeight: "bold",
+                cursor: "pointer",
+                zIndex: 2,
+              }}
+              aria-label="Previous image"
             >
-              <span className="text-muted">No Image Available</span>
+              &#8592;
+            </button>
+            <button
+              type="button"
+              onClick={handleNextImage}
+              style={{
+                position: "absolute",
+                top: "50%",
+                right: 10,
+                transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.8)",
+                border: "none",
+                borderRadius: "50%",
+                width: 36,
+                height: 36,
+                fontSize: 22,
+                fontWeight: "bold",
+                cursor: "pointer",
+                zIndex: 2,
+              }}
+              aria-label="Next image"
+            >
+              &#8594;
+            </button>
+            <div
+              style={{
+                position: "absolute",
+                bottom: 10,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "rgba(0,0,0,0.5)",
+                color: "#fff",
+                padding: "2px 12px",
+                borderRadius: 12,
+                fontSize: 14,
+              }}
+            >
+              {currentImage + 1} / {product.images.length}
             </div>
-          )}
-
-          {product.images && product.images.length > 1 && (
-            <div className="row mt-3">
-              {product.images.slice(1).map((img, index) => (
-                <div className="col-3" key={index}>
-                  <img 
-                    src={img} 
-                    className="img-thumbnail" 
-                    alt={`${product.name} - view ${index + 2}`} 
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
+          </>
+        )}
+      </>
+    ) : (
+      <div
+        className="bg-light d-flex align-items-center justify-content-center border rounded"
+        style={{ height: "100%" }}
+      >
+        <span className="text-muted">No Image Available</span>
+      </div>
+    )}
+  </div>
+</div>
+       
+                
         <div className="col-md-7">
           <div className="card shadow-sm">
             <div className="card-body">

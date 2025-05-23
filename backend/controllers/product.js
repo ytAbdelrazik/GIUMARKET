@@ -109,7 +109,21 @@ const searchProduct = async (req, res) => {
 // Create a new product
 const createProduct = async (req, res) => {
   try {
+    /*  
+    REMOVED THE IMAGES FOR NOW
     const { name, price, category, quantity, condition, seller, description, images } = req.body;
+    */
+
+    const { name, price, category, quantity, condition,description } = req.body;
+    // Get the seller from the authenticated user
+    seller = req.user.id; 
+
+    let images = [];
+    if (req.files && req.files.productImage) {
+      images = req.files.productImage.map(file => file.path);
+    }
+
+    console.log(name, price, category, quantity, condition, seller, description);
 
     // Create a new product instance
     const newProduct = new Product({
@@ -194,6 +208,49 @@ const flagProduct = async (req, res) => {
   }
 }
 
+
+// ADD IMAGE / DELETE IMAGE FOR PRODUCT
+
+
+const addProductImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!req.file) return res.status(400).json({ message: "No image uploaded" });
+
+    const product = await Product.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    product.images.push(req.file.path);
+    await product.save();
+
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const removeProductImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { imagePath } = req.body; 
+
+    const product = await Product.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    product.images = product.images.filter(img => img !== imagePath);
+    await product.save();
+
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
+
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 // Export all functions
 module.exports = {
   getAllProducts,
@@ -205,5 +262,7 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
-  flagProduct
+  flagProduct,
+  addProductImage,
+  removeProductImage,
 };

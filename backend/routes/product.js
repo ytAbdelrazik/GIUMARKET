@@ -5,6 +5,8 @@ const authMiddleware  = require("../middleware/authMiddleware"); // Updated impo
 const { adminOnly } = require("../middleware/adminOnly")
 const Product = require("../models/product");
 const adminMiddleware = require('../middleware/adminMiddleware');
+const upload = require("../middleware/upload");
+
 
 // GET REQUESTS (SHOW PRODUCTS AND SEARCH FUNCTION) 
 
@@ -63,15 +65,25 @@ router.get("/search", async (req, res) => {
 
 // POST REQUEST (ADD NEW PRODUCT)
 
-// 7) Create a new product
+// 7) Create a new product (ADDED IMAGE UPLOAD FUNCTIONALITY)
 //Tested-Working
-router.post("/create", productController.createProduct);
+router.post(
+  "/create",
+  authMiddleware,
+  upload.fields([{ name: 'productImage', maxCount: 5 }]), // allow up to 5 images
+  productController.createProduct
+);
 
 // PUT REQUEST (UPDATE PRODUCT)
 
 // 8) Update product
 //Tested-Working
-router.put("/update/:id", authMiddleware, productController.updateProduct);
+router.put(
+  "/update/:id",
+  authMiddleware,
+  upload.fields([{ name: 'productImage', maxCount: 5 }]),
+  productController.updateProduct
+);
 
 // DELETE REQUEST (DELETE PRODUCT)
 
@@ -82,3 +94,20 @@ router.delete("/delete/:id", authMiddleware, productController.deleteProduct);
 router.put("/flag/:id", authMiddleware, adminMiddleware, productController.flagProduct);
 
 module.exports = router;
+
+
+
+
+// IMAGE ROUTES (PRODUCT IMAGE UPLOAD)
+
+router.post(
+  "/:id/add-image",
+  
+  upload.single('productImage'),
+  productController.addProductImage
+);
+
+router.delete(
+  "/:id/remove-image",
+  productController.removeProductImage
+);

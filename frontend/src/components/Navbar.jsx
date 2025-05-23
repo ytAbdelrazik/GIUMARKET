@@ -38,6 +38,9 @@ const Navbar = ({ user, setUser }) => {
                 <li className="nav-item">
                   <Link to="/chat" className="nav-link">Messages</Link>
                 </li>
+                <li className="nav-item">
+                  <Link to="/reservations" className="nav-link">Reservations</Link>
+                </li>
                 {user.isAdmin && (
                   <li className="nav-item">
                     <Link to="/admin" className="nav-link">Admin</Link>

@@ -80,11 +80,11 @@ const ReservationManagement = ({ user, isSeller = false }) => {
               <div key={reservation._id} className="list-group-item">
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <h6 className="mb-1">{reservation.product.name}</h6>
+                    <h6 className="mb-1">{reservation.product?.name || "Unknown Product"}</h6>
                     <p className="mb-1">
                       {isSeller
-                        ? `Requested by: ${reservation.buyer.name}`
-                        : `Seller: ${reservation.seller.name}`}
+                        ? `Requested by: ${reservation.buyer?.name || "Unknown"}`
+                        : `Seller: ${reservation.seller?.name || "Unknown"}`}
                     </p>
                     <small className="text-muted">
                       Status: {reservation.status}
