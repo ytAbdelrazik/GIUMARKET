@@ -95,6 +95,9 @@ export const reservationApi = {
   
   // Cancel reservation
   cancelReservation: (reservationId) => api.put(`/reservations/cancel/${reservationId}`),
+
+  // Mark product as sold
+  markAsSold: (reservationId) => api.put(`/reservations/sold/${reservationId}`),
 };
 
 // Auth Services

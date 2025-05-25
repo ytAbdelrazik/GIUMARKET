@@ -21,4 +21,8 @@ router.put("/reject/:reservationId", authMiddleware, reservationController.rejec
 // Cancel a reservation
 router.put("/cancel/:reservationId", authMiddleware, reservationController.cancelReservation);
 
+// Mark reservation as sold
+router.put("/sold/:reservationId", authMiddleware, reservationController.markAsSold);
+
+
 module.exports = router; 

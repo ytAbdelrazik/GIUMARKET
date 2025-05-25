@@ -5,6 +5,8 @@ const ReservationManagement = ({ user, isSeller = false }) => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showSoldModal, setShowSoldModal] = useState(false);
+  const [selectedReservationId, setSelectedReservationId] = useState(null);
 
   useEffect(() => {
     fetchReservations();
@@ -51,6 +53,25 @@ const ReservationManagement = ({ user, isSeller = false }) => {
     }
   };
 
+  const handleMarkAsSold = (reservationId) => {
+    setSelectedReservationId(reservationId);
+    setShowSoldModal(true);
+  };
+
+  const confirmMarkAsSold = async () => {
+    try {
+      setLoading(true);
+      await reservationApi.markAsSold(selectedReservationId);
+      setShowSoldModal(false);
+      setSelectedReservationId(null);
+      await fetchReservations();
+    } catch (err) {
+      setError('Failed to mark as sold');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center">
@@ -71,7 +92,7 @@ const ReservationManagement = ({ user, isSeller = false }) => {
         <h5 className="card-title">
           {isSeller ? 'Reservation Requests' : 'My Reservations'}
         </h5>
-        
+
         {reservations.length === 0 ? (
           <p className="text-muted">No reservations found</p>
         ) : (
@@ -90,7 +111,7 @@ const ReservationManagement = ({ user, isSeller = false }) => {
                       Status: {reservation.status}
                     </small>
                   </div>
-                  
+
                   <div className="d-flex gap-2">
                     {isSeller && reservation.status === 'pending' && (
                       <>
@@ -110,7 +131,7 @@ const ReservationManagement = ({ user, isSeller = false }) => {
                         </button>
                       </>
                     )}
-                    
+
                     {!isSeller && reservation.status === 'pending' && (
                       <button
                         className="btn btn-danger btn-sm"
@@ -120,6 +141,15 @@ const ReservationManagement = ({ user, isSeller = false }) => {
                         Cancel
                       </button>
                     )}
+                    {isSeller && reservation.status === 'accepted' && (
+                      <button
+                        className="btn btn-warning btn-sm"
+                        onClick={() => handleMarkAsSold(reservation._id)}
+                        disabled={loading}
+                      >
+                        Mark as Sold
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -127,6 +157,28 @@ const ReservationManagement = ({ user, isSeller = false }) => {
           </div>
         )}
       </div>
+      {/* Modal for confirmation */}
+      {showSoldModal && (
+        <div className="modal show d-block" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Mark as Sold</h5>
+                <button type="button" className="btn-close" onClick={() => setShowSoldModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to mark this product as sold?</p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setShowSoldModal(false)}>Cancel</button>
+                <button className="btn btn-warning" onClick={confirmMarkAsSold} disabled={loading}>
+                  Yes, Mark as Sold
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

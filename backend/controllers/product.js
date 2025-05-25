@@ -92,11 +92,13 @@ const searchProduct = async (req, res) => {
     const { q } = req.query;
 
     if (!q) {
-      const products = await Product.find();
+      // Only return available products if no search term
+      const products = await Product.find({ availability: true });
       return res.json(products);
     }
 
     const products = await Product.find({
+      availability: true, // <-- Only available products
       $or: [{ name: { $regex: q, $options: "i" } }],
     });
 

@@ -79,7 +79,7 @@ const createReservation = async (req, res) => {
 const getSellerReservations = async (req, res) => {
   try {
     const sellerId = req.user.id; // Get the ID from the user object
-    const reservations = await Reservation.find({ seller: sellerId })
+    const reservations = await Reservation.find({ seller: sellerId, status: { $ne: "sold" } })
       .populate("product")
       .populate("buyer", "name email phoneNumber");
     res.json(reservations);
@@ -92,7 +92,7 @@ const getSellerReservations = async (req, res) => {
 const getBuyerReservations = async (req, res) => {
   try {
     const buyerId = req.user.id; // Get the ID from the user object
-    const reservations = await Reservation.find({ buyer: buyerId })
+    const reservations = await Reservation.find({ buyer: buyerId, status: { $ne: "sold" } })
       .populate("product")
       .populate("seller", "name email phoneNumber");
     res.json(reservations);
@@ -225,6 +225,40 @@ const cancelReservationAX = async (req, res) => {
   }
 };
 
+const markAsSold = async (req, res) => {
+  try {
+    const { reservationId } = req.params;
+    const sellerId = req.user.id;
+
+    // Find the reservation
+    const reservation = await Reservation.findOne({
+      _id: reservationId,
+      seller: sellerId,
+      status: "accepted"
+    });
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found or not accepted" });
+    }
+
+    // Update reservation and product
+    reservation.status = "sold";
+    reservation.responseDate = Date.now();
+    await reservation.save();
+
+    const product = await Product.findById(reservation.product);
+    if (product) {
+      product.availability = false;
+      await product.save();
+    }
+
+    res.json({ message: "Product marked as sold", reservation });
+  } catch (error) {
+    console.error("Mark as sold error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   createReservation,
   getSellerReservations,
@@ -233,4 +267,5 @@ module.exports = {
   rejectReservation,
   cancelReservation,
   cancelReservationAX,
+  markAsSold,
 }; 
